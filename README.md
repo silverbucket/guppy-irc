@@ -4,8 +4,8 @@ guppy-irc
 A tiny embeddable IRC client, using the open-source [sockethub service](http://sockethub.org).
 
 
-use
-===
+example
+=======
 
 To get the Guppy IRC example up and running, do the following.
 

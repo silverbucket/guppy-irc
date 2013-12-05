@@ -1,7 +1,7 @@
 guppy-irc
 =========
 
-A tiny embeddable IRC client, using the open-source ([sockethub service](http://sockethub.org)).
+A tiny embeddable IRC client, using the open-source [sockethub service](http://sockethub.org).
 
 
 use

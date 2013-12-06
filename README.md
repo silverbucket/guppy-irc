@@ -1,9 +1,9 @@
-guppy-irc
+Guppy IRC
 =========
 
 A tiny embeddable IRC client, using the open-source [sockethub service](http://sockethub.org).
 
-use
+Use
 ===
 
 To use guppy-irc you must include a few `.js` files and define the guppy widget:
@@ -32,7 +32,7 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
   ...
 ```
 
-dependencies
+Dependencies
 ============
 
 Guppy IRC uses Sockethub for IRC connectivity, and therefore has the following
@@ -42,7 +42,7 @@ dependencies:
 
 * A running [Sockethub](http://github.com/sockethub/sockethub) instance.
 
-status
+Status
 ======
 
 Guppy IRC currently has basic functionality. You can connect to a channel, and
@@ -53,10 +53,10 @@ more stable so should Guppy. However right now things appear to be functional
 stable at it's basic element, if lacking in features.
 
 
-example
+Example
 =======
 
-### live demo
+### Live demo
 
 You can try out Guppy IRC, which is connecting to a public sockethub instance
 and automatically connects to the #sockethub channel, here:
@@ -64,7 +64,7 @@ and automatically connects to the #sockethub channel, here:
 [http://silverbucket.github.io/guppy-irc/example/](http://silverbucket.github.io/guppy-irc/example/)
 
 
-### run your own demo
+### Run your own demo
 
 To get the Guppy IRC example up and running, do the following.
 
@@ -76,27 +76,31 @@ To get the Guppy IRC example up and running, do the following.
 Then browse to `localhost:8000/example`, you should see the example load in your
 browser.
 
-css elements
+CSS Elements
 ============
 
 The following is a list of all the css elements for a guppy-irc widget. Allowing
 you to create your own theme css files.
 
 #### parent container
+
   `.guppy-irc-container` - parent container of widget contents.
 
 
 #### title
+
   `.guppy-irc-title-container` - div containing title
   
   `.guppy-irc-title` - actual title element (an *h1* tag)
 
 
 #### info
+
   `.guppy-irc-info` - contains information text *(not used yet)*
 
 
 #### messages
+
   `.guppy-irc-messages-container` - container of all messages
   
   `.guppy-irc-message-line` - a single message line
@@ -107,6 +111,7 @@ you to create your own theme css files.
 
 ##### - messages addressed to you
 The same assignments as above except only added to elements where the text contains your IRC nick.
+
   `.guppy-irc-message-line-to-me`
   
   `.guppy-irc-message-nick-to-me`
@@ -118,6 +123,7 @@ The same assignments as above except only added to elements where the text conta
 
 #### controls
 The various inputs, buttons, etc.
+
   `.guppy-irc-controls-container` - contains all controls
 
   `.guppy-irc-input-container` - the input container

@@ -10,6 +10,6 @@ cp ../tmp/guppy-irc/index.html example/ &&
 cp ../tmp/guppy-irc/guppy-irc.js src/js/ &&
 cp ../tmp/guppy-irc/guppy-irc.css src/css/ &&
 git commit -m "updating gh-pages demo" . &&
-git push &&
+git push origin gh-pages
 git checkout master
 

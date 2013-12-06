@@ -223,7 +223,7 @@
     if (self.config.autoconnect) {
       getSockethubClient(e, initIRC);
     } else {
-      // FIXME: wait for 'connect' signal
+      // TODO: wait for 'connect' signal
       // .. then ...
       // getSockethubClient(e, initIRC);
     }
@@ -237,9 +237,13 @@
     function onEnterHandler(event) {
       event.which = event.which || event.keyCode;
       if (event.which === 13) {
-        console.log('got enter!!', event);
+        //console.log('got enter!!', event);
         // send message
-        self.sendMessage();
+        self.DOMElements.input.disabled = true;
+        var text = self.DOMElements.input.value;
+        self.DOMElements.input.value = '';
+        self.sendMessage(text);
+        self.DOMElements.input.disabled = false;
       }
     }
     self.DOMElements.input.addEventListener('keyup', onEnterHandler);
@@ -247,19 +251,38 @@
     return this;
   };
 
+
   /**
    * Function: displayMessage
    *
-   * Writes the message to the textarea box of the guppy widget
+   * Builds a message line with a sockethub activity streams object, and then
+   * adds it to the message container div.
    *
    * Parameters:
    *
-   *   obj - sockethub activity stream object of verb 'send' and platform 'irc'
+   *   obj - sockethub activity stream object of verb 'send' and platform 'irc'.
+   *         ( tip: this function only uses the obj.actor.address,
+   *                obj.actor.name, and obj.object.text properties )
    *
    */
   Guppy.prototype.displayMessage = function (obj) {
-    var message = obj.actor.address + ': ' + obj.object.text;
-    this.DOMElements.textarea.value = this.DOMElements.textarea.value + '\n' + message;
+    var nick = document.createElement('span');
+    nick.className = 'guppy-irc-message-nick guppy-irc-' + this.config.id + '-message-nick';
+    nick.innerHTML = obj.actor.address;
+
+    var decorator = document.createElement('span');
+    decorator.className = 'guppy-irc-nick-decorator guppy-irc-' + this.config.id  + '-nick-decorator';
+    decorator.innerHTML = ":";
+
+    var text = document.createElement('span');
+    text.className = 'guppy-irc-message-text guppy-irc-' + this.config.id  + '-message-text';
+    text.innerHTML = obj.object.text;
+
+    var messageLine = document.createElement('p');
+    messageLine.className = 'guppy-irc-message-line guppy-irc-' + this.config.id + '-message-line';
+    messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
+
+    this.DOMElements.messagesContainer.appendChild(messageLine);
   };
 
   /**
@@ -268,12 +291,13 @@
    * Sends a message to Sockethub's IRC platform, and displays it in the textarea
    * console when successful.
    *
-   * The message is automatically fetched from the input field.
+   * Parameters:
+   *
+   *   message - text string of message to send (just text string, no meta data)
    *
    */
-  Guppy.prototype.sendMessage = function () {
+  Guppy.prototype.sendMessage = function (message) {
     var self = this;
-    var message = self.DOMElements.input.value;
     if (!message) {
       return false;
     }
@@ -293,9 +317,15 @@
       // completed
       // add name to message output
       console.log('success');
-      message = self.actor.address + ': ' + message;
-      self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' + message;
-      self.DOMElements.input.value = '';
+      self.displayMessage({
+        actor: {
+          address: self.actor.address,
+          name: self.actor.name
+        },
+        object: {
+          text: message
+        }
+      });
     }, function (err) {
       // error
       self.setError(err.message, err);
@@ -337,7 +367,7 @@
    *
    */
   Guppy.prototype.setState = function (state) {
-    // FIXME: switch to emitters
+    // TODO: switch to emitters
     this.state = state;
   };
 
@@ -369,19 +399,14 @@
     infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
     container.appendChild(infoContainer);
 
-    // textarea
-    var textarea = document.createElement('textarea');
-    textarea.className = 'guppy-irc-textarea guppy-irc-' + this.config.id + '-textarea';
-    textarea.name = 'guppy-irc-' + this.config.id;
-    textarea.cols = this.config.width;
-    textarea.rows = this.config.height;
-    textarea.wrap = 'soft';
-    textarea.maxlength = 0;
-    textarea.readonly = 'readonly';
-    var textareaContainer = document.createElement('div');
-    textareaContainer.className = 'guppy-irc-textarea-container guppy-irc-' + this.config.id + '-textarea-container';
-    textareaContainer.appendChild(textarea);
-    container.appendChild(textareaContainer);
+    // message area
+    var messagesContainer = document.createElement('div');
+    messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
+    messagesContainer.style.width = this.config.width + 'px';
+    messagesContainer.style.height = this.config.height + 'px';
+    messagesContainer.style.overflow = 'auto';
+    messagesContainer.style.border = '1px solid grey';
+    container.appendChild(messagesContainer);
 
     // input
     var input = document.createElement('input');
@@ -409,9 +434,9 @@
     container.appendChild(controlsContainer);
 
     this.DOMElements.widget = container;
-    this.DOMElements.textarea = textarea;
     this.DOMElements.input = input;
     this.DOMElements.submit = submit;
+    this.DOMElements.messagesContainer = messagesContainer;
     document.body.appendChild(container);
   };
 

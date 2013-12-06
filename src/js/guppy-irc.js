@@ -188,6 +188,9 @@
         });
       }).then(function () {
         console.log(self.log_id + ' connected to ' + self.config.channel);
+        self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' +
+              ' --- connected to ' + self.config.server + ' on channel ' +
+                                     self.config.channel + ' --- ';
         self.setState('connected');
       }, function (err) {
         // error setting credentials
@@ -303,6 +306,8 @@
     } else {
       console.log(this.log_id + ' ERROR: ' + this.errMsg);
     }
+    self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' +
+              ' --- Guppy ERROR: ' + errMsg + ' --- ';
     this.errMsg = err;
     this.setState('error');
   };

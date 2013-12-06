@@ -10,11 +10,8 @@ To use guppy-irc you must include a few `.js` files, a `.css` file, and define t
 
 
 ```html
-
-    <link rel="stylesheet" href="../src/css/guppy-irc.css" />
-
+    <link rel="stylesheet" href="guppy-irc.css" />
     ...
-
     <guppy-irc  id="myGuppy"
                 data-title="Welcome to Guppy IRC"
                 data-width="80"
@@ -30,12 +27,9 @@ To use guppy-irc you must include a few `.js` files, a `.css` file, and define t
                 data-sockethub-tls="<true|false>"
                 data-sockethub-path="*<uri_path>"
                 data-sockethub-secret="<register_string>" />
-
     ...
-
-    <script src="sockethub-client/sockethub-client.js"></script>
-
-    <script src="../src/js/guppy-irc.js"></script>
+    <script src="sockethub-client.js"></script>
+    <script src="guppy-irc.js"></script>
 ```
 
 

@@ -488,7 +488,7 @@
     nick.innerHTML = obj.actor.address;
 
     var decorator = document.createElement('span');
-    decorator.className = 'guppy-irc-nick-decorator guppy-irc-' + this.config.id  + '-nick-decorator';
+    decorator.className = 'guppy-irc-message-nick-decorator guppy-irc-' + this.config.id  + '-message-nick-decorator';
     decorator.innerHTML = ":";
 
     var text = document.createElement('span');

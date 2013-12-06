@@ -1,6 +1,5 @@
 #!/bin/sh
-mkdir ../tmp
-mkdir ../tmp/guppy-irc
+mkdir -p ../tmp/guppy-irc
 cp example/index.html ../tmp/guppy-irc/index.html &&
 cp src/js/guppy-irc.js ../tmp/guppy-irc/guppy-irc.js &&
 cp src/css/guppy-irc.css ../tmp/guppy-irc/guppy-irc.css &&

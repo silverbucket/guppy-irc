@@ -144,7 +144,9 @@
     self.config = getGuppyConfig(e);
     self.id = self.config.id;
     self.log_id = app + '#' + self.id;
-    self.DOMElement = e;
+    self.DOMElements = {};
+    self.DOMElements.original = e;
+
     console.log('NEW GUPPY ' + self.id + ':', self.config);
 
     //
@@ -191,6 +193,13 @@
         // error setting credentials
         self.setError(err.message, 'Sockethub Error: ' + err);
       });
+
+      sc.on('message', function (obj) {
+        if ((obj.platform === 'irc') &&
+            (obj.verb === 'send')) {
+          self.displayMessage(obj);
+        }
+      });
     }
 
     //
@@ -207,7 +216,74 @@
     // do all the ugly DOM stuff.
     self.buildWidget();
 
+    //
+    // listen for input submition text
+    function onEnterHandler(event) {
+      event.which = event.which || event.keyCode;
+      if (event.which === 13) {
+        console.log('got enter!!', event);
+        // send message
+        self.sendMessage();
+      }
+    }
+    self.DOMElements.input.addEventListener('keyup', onEnterHandler);
+
     return this;
+  };
+
+  /**
+   * Function: displayMessage
+   *
+   * Writes the message to the textarea box of the guppy widget
+   *
+   * Parameters:
+   *
+   *   obj - sockethub activity stream object of verb 'send' and platform 'irc'
+   *
+   */
+  Guppy.prototype.displayMessage = function (obj) {
+    var message = obj.actor.address + ': ' + obj.object.text;
+    this.DOMElements.textarea.value = this.DOMElements.textarea.value + '\n' + message;
+  };
+
+  /**
+   * Function: sendMessage
+   *
+   * Sends a message to Sockethub's IRC platform, and displays it in the textarea
+   * console when successful.
+   *
+   * The message is automatically fetched from the input field.
+   *
+   */
+  Guppy.prototype.sendMessage = function () {
+    var self = this;
+    var message = self.DOMElements.input.value;
+    if (!message) {
+      return false;
+    }
+
+    console.log('sending '+message);
+    self.sockethubClient.sendObject({
+      verb: 'send',
+      platform: 'irc',
+      actor: self.actor,
+      target: [{
+        address: self.config.channel
+      }],
+      object: {
+        text: message
+      }
+    }).then(function () {
+      // completed
+      // add name to message output
+      console.log('success');
+      message = self.actor.address + ': ' + message;
+      self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' + message;
+      self.DOMElements.input.value = '';
+    }, function (err) {
+      // error
+      self.setError(err.message, err);
+    });
   };
 
   /**
@@ -255,7 +331,7 @@
    *
    */
   Guppy.prototype.buildWidget = function () {
-    var e = this.DOMElement;
+    var e = this.DOMElements.original;
 
     // encapsulating container
     var container = document.createElement('div');
@@ -314,7 +390,10 @@
     controlsContainer.appendChild(submitContainer);
     container.appendChild(controlsContainer);
 
-    this.widgetElement = container;
+    this.DOMElements.widget = container;
+    this.DOMElements.textarea = textarea;
+    this.DOMElements.input = input;
+    this.DOMElements.submit = submit;
     document.body.appendChild(container);
   };
 

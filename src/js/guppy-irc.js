@@ -499,7 +499,20 @@
     messageLine.className = 'guppy-irc-message-line guppy-irc-' + this.config.id + '-message-line';
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
 
+    //
+    // only autoscroll if the user is not scrolling up in the history, because
+    // that would be irritating, wouldn't it?
+    //
+    // Subtract height of window from scrollHeight, and if the result doesn't
+    // match with scrollTop, then we know the user is viewing the buffer.
+    var autoScroll = true;
+    if (this.DOMElements.messagesContainer.scrollTop !== (this.DOMElements.messagesContainer.scrollHeight - this.config.height)) {
+      autoScroll = false;
+    }
     this.DOMElements.messagesContainer.appendChild(messageLine);
+    if (autoScroll) {
+      this.DOMElements.messagesContainer.scrollTop = this.DOMElements.messagesContainer.scrollHeight;
+    }
   };
 
   /**

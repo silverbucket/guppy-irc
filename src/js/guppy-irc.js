@@ -330,7 +330,6 @@
    *
    *   cfg - Guppy instances cfg object
    *   key - string indicating this specific app+widget
-   *   connectString -
    *
    * Returns:
    *

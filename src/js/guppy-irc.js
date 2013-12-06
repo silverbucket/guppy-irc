@@ -483,20 +483,43 @@
    *
    */
   Guppy.prototype.displayMessage = function (obj) {
+    // check if my nick is mentioned
+    var toMeClassEnding = '-to-me';
+    isToMe = false;
+    if (obj.object.text.search(this.config.nick) >= 0) {
+      isToMe = true;
+    }
+
     var nick = document.createElement('span');
     nick.className = 'guppy-irc-message-nick guppy-irc-' + this.config.id + '-message-nick';
+    if (isToMe) { // if this message has my nick, we add some more classes
+      nick.className += ' guppy-irc-message-nick' + toMeClassEnding +
+                        ' guppy-irc-' + this.config.id + '-message-nick' + toMeClassEnding;
+    }
     nick.innerHTML = obj.actor.address;
 
     var decorator = document.createElement('span');
     decorator.className = 'guppy-irc-message-nick-decorator guppy-irc-' + this.config.id  + '-message-nick-decorator';
+    if (isToMe) { // if this message has my nick, we add some more classes
+      decorator.className += ' guppy-irc-message-nick-decorator' + toMeClassEnding +
+                             ' guppy-irc-' + this.config.id + '-message-nick-decorator' + toMeClassEnding;
+    }
     decorator.innerHTML = ":";
 
     var text = document.createElement('span');
     text.className = 'guppy-irc-message-text guppy-irc-' + this.config.id  + '-message-text';
+    if (isToMe) { // if this message has my nick, we add some more classes
+      text.className += ' guppy-irc-message-text' + toMeClassEnding +
+                        ' guppy-irc-' + this.config.id + '-message-text' + toMeClassEnding;
+    }
     text.innerHTML = obj.object.text;
 
     var messageLine = document.createElement('p');
     messageLine.className = 'guppy-irc-message-line guppy-irc-' + this.config.id + '-message-line';
+    if (isToMe) { // if this message has my nick, we add some more classes
+      text.className += ' guppy-irc-message-line' + toMeClassEnding +
+                        ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
+    }
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
 
     //

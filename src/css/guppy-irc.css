@@ -63,3 +63,12 @@ guppy-irc {
 .guppy-irc-submit-button-container {
   float: right;
 }
+
+/* system message lines */
+.guppy-irc-error-line {
+  color: red;
+  margin: 0;
+}
+.guppy-irc-status-line {
+  margin: 0;
+}

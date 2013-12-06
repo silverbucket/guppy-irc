@@ -339,11 +339,11 @@
     var uid = window.localStorage.getItem(key);
     if (!uid) {
       // generate random number
-      uid = Math.floor((Math.random()*99999)+10000);
+      uid = Math.floor((Math.random() * 99999) + 10000);
       window.localStorage.setItem(key, uid);
     }
 
-    var sid = md5(uid+cfg.sockethub.uid);
+    var sid = md5(uid + cfg.sockethub.uid);
     var idSpace =  16 - cfg.nick.length;
     var u_nick = cfg.nick + sid.substr(sid.length - idSpace);
 
@@ -418,9 +418,8 @@
         });
       }).then(function () {
         console.log(self.log_id + ' connected to ' + self.config.channel);
-        self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' +
-              ' --- connected to ' + self.config.server + ' on channel ' +
-                                     self.config.channel + ' --- ';
+        self.displaySystemMessage('status', 'connected to ' + self.config.server +
+                                            ' on channel ' + self.config.channel);
         self.setState('connected');
       }, function (err) {
         // error setting credentials
@@ -448,6 +447,7 @@
     //
     // do all the ugly DOM stuff.
     self.buildWidget();
+    self.displaySystemMessage('status', 'connecting to ' + self.config.server + ' ...');
 
     //
     // listen for input submition text
@@ -468,6 +468,56 @@
     return this;
   };
 
+  /**
+   * Function: writeToMessageContainer
+   *
+   * Takes a <p> element and appends it to the messageContainer div, keeping
+   * in mind things like autoscroll behavior.
+   *
+   * Parameters:
+   *
+   *   ml - <p> element (message line)
+   *
+   */
+  Guppy.prototype.writeToMessageContainer = function (ml) {
+    //
+    // only autoscroll if the user is not scrolling up in the history, because
+    // that would be irritating, wouldn't it?
+    //
+    // Subtract height of window from scrollHeight, and if the result doesn't
+    // match with scrollTop, then we know the user is viewing the buffer.
+    var autoScroll = true;
+    if (this.DOMElements.messagesContainer.scrollTop !== (this.DOMElements.messagesContainer.scrollHeight - this.config.height)) {
+      autoScroll = false;
+    }
+    this.DOMElements.messagesContainer.appendChild(ml);
+    if (autoScroll) {
+      this.DOMElements.messagesContainer.scrollTop = this.DOMElements.messagesContainer.scrollHeight;
+    }
+  };
+
+  /**
+   * Function: displaySystemMessage
+   *
+   * Displays a Guppy system message to the message area
+   *
+   * Parameters:
+   *
+   *   type - 'error', 'status'
+   *   text - text string to display
+   *
+   */
+  Guppy.prototype.displaySystemMessage = function (type, text) {
+    var messageLine = document.createElement('p');
+    if (type === 'error') {
+      messageLine.className = 'guppy-irc-error-line guppy-irc-' + this.config.id + '-error-line';
+      messageLine.innerHTML = '----: ERROR: ' + text;
+    } else {
+      messageLine.className = 'guppy-irc-status-line guppy-irc-' + this.config.id + '-status-line';
+      messageLine.innerHTML = '----: ' + text;
+    }
+    this.writeToMessageContainer(messageLine);
+  };
 
   /**
    * Function: displayMessage
@@ -517,25 +567,12 @@
     var messageLine = document.createElement('p');
     messageLine.className = 'guppy-irc-message-line guppy-irc-' + this.config.id + '-message-line';
     if (isToMe) { // if this message has my nick, we add some more classes
-      text.className += ' guppy-irc-message-line' + toMeClassEnding +
-                        ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
+      messageLine.className += ' guppy-irc-message-line' + toMeClassEnding +
+                               ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
     }
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
 
-    //
-    // only autoscroll if the user is not scrolling up in the history, because
-    // that would be irritating, wouldn't it?
-    //
-    // Subtract height of window from scrollHeight, and if the result doesn't
-    // match with scrollTop, then we know the user is viewing the buffer.
-    var autoScroll = true;
-    if (this.DOMElements.messagesContainer.scrollTop !== (this.DOMElements.messagesContainer.scrollHeight - this.config.height)) {
-      autoScroll = false;
-    }
-    this.DOMElements.messagesContainer.appendChild(messageLine);
-    if (autoScroll) {
-      this.DOMElements.messagesContainer.scrollTop = this.DOMElements.messagesContainer.scrollHeight;
-    }
+    this.writeToMessageContainer(messageLine);
   };
 
   /**
@@ -555,7 +592,7 @@
       return false;
     }
 
-    self.sockethubClient.sendObject({
+    var obj = {
       verb: 'send',
       platform: 'irc',
       actor: self.actor,
@@ -565,7 +602,10 @@
       object: {
         text: message
       }
-    }).then(function () {
+    };
+
+    console.log('sendMessage called: ', obj);
+    self.sockethubClient.sendObject(obj).then(function () {
       // completed
       // add name to message output
       self.displayMessage({
@@ -600,10 +640,10 @@
     } else {
       console.log(this.log_id + ' ERROR: ' + this.errMsg);
     }
-    self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' +
-              ' --- Guppy ERROR: ' + errMsg + ' --- ';
+
     this.errMsg = err;
     this.setState('error');
+    this.displaySystemMessage('error', errMsg);
   };
 
   /**
@@ -626,7 +666,7 @@
    * Function: buildWidget
    *
    * Handles all of the DOM drawing of elements withing the Guppy widget.
-   * Textarea, input, send button, connection info, etc.
+   * messages area, input, send button, connection info, etc.
    *
    */
   Guppy.prototype.buildWidget = function () {

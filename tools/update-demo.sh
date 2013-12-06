@@ -1,0 +1,15 @@
+#!/bin/sh
+mkdir ../tmp
+mkdir ../tmp/guppy-irc
+cp example/index.html ../tmp/guppy-irc/index.html &&
+cp src/js/guppy-irc.js ../tmp/guppy-irc/guppy-irc.js &&
+cp src/css/guppy-irc.css ../tmp/guppy-irc/guppy-irc.css &&
+git push &&
+git checkout gh-pages &&
+cp ../tmp/guppy-irc/index.html example/ &&
+cp ../tmp/guppy-irc/guppy-irc.js src/js/ &&
+cp ../tmp/guppy-irc/guppy-irc.css src/css/ &&
+git commit -m "updating gh-pages demo" . &&
+git push &&
+git checkout master
+

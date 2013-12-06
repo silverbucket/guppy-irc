@@ -40,6 +40,9 @@ guppy-irc {
 .guppy-irc-message-nick-decorator {
   margin: 0 5px 0 2px;
 }
+.guppy-irc-message-nick-to-me {
+  color: brown;
+}
 
 /* controls container */
 .guppy-irc-controls-container {

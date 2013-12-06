@@ -111,6 +111,12 @@
     cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
     cfg.displayName = e.getAttribute('data-display-name') || 'Guppy User';
     cfg.password = e.getAttribute('data-password');
+    cfg.autoconnect = e.getAttribute('data-autoconnect');
+    if (cfg.autoconnect === 'true') {
+      cfg.autoconnect = true;
+    } else {
+      cfg.autoconnect = false;
+    }
     if ((typeof cfg.password === 'string') && (cfg.password === '')) {
       cfg.password = undefined;
     }
@@ -141,7 +147,10 @@
     self.DOMElement = e;
     console.log('NEW GUPPY ' + self.id + ':', self.config);
 
-    getSockethubClient(e, function (err, sc) {
+    //
+    // after we've connected to sockethub, initIRC handles the credentials and
+    // registering of the sockethub irc platform.
+    function initIRC(err, sc) {
       // got sockethub client object (sc)
       if (err) {
         self.setError(err);
@@ -152,15 +161,16 @@
       // set our credentials for the sockethub platform
       // (does not activate the IRC session, just stores the data)
       var credentialObject = {};
+      self.actor = {
+        address: self.config.nick,
+        name: self.config.displayName
+      };
       credentialObject[self.config.nick] = {
         nick: self.config.nick,
         password: self.config.password,
         server: self.config.server,
         channels: [ self.config.channel ],
-        actor: {
-          address: self.config.nick,
-          name: self.config.displayName
-        }
+        actor: self.actor
       };
 
       sc.set('irc', {
@@ -168,14 +178,33 @@
       }).then(function () {
         // successful set credentials
         console.log(self.log_id + ' set credentials!');
+        return sc.sendObject({
+          verb: 'update',
+          platform: 'irc',
+          actor: self.actor,
+          target: []
+        });
+      }).then(function () {
+        console.log(self.log_id + ' connected to ' + self.config.channel);
         self.setState('connected');
       }, function (err) {
         // error setting credentials
         self.setError(err.message, 'Sockethub Error: ' + err);
       });
+    }
 
-    });
+    //
+    // decide if we connect to IRC now, or later.
+    if (self.config.autoconnect) {
+      getSockethubClient(e, initIRC);
+    } else {
+      // FIXME: wait for 'connect' signal
+      // .. then ...
+      // getSockethubClient(e, initIRC);
+    }
 
+    //
+    // do all the ugly DOM stuff.
     self.buildWidget();
 
     return this;
@@ -218,77 +247,86 @@
     this.state = state;
   };
 
+  /**
+   * Function: buildWidget
+   *
+   * Handles all of the DOM drawing of elements withing the Guppy widget.
+   * Textarea, input, send button, connection info, etc.
+   *
+   */
   Guppy.prototype.buildWidget = function () {
     var e = this.DOMElement;
 
     // encapsulating container
     var container = document.createElement('div');
-    container.className = 'guppy-irc-container guppy-irc-'+this.config.id+'-container';
+    container.className = 'guppy-irc-container guppy-irc-' + this.config.id + '-container';
 
     // title of widget
     var title = document.createElement('h1');
-    title.className = 'guppy-irc-title guppy-irc-'+this.config.id+'-title';
+    title.className = 'guppy-irc-title guppy-irc-' + this.config.id + '-title';
     title.innerHTML = this.config.title;
     var titleContainer = document.createElement('div');
-    titleContainer.className = 'guppy-irc-title-container guppy-irc-'+this.config.id+'-title-container';
+    titleContainer.className = 'guppy-irc-title-container guppy-irc-' + this.config.id + '-title-container';
     titleContainer.appendChild(title);
     container.appendChild(titleContainer); // put inside container
 
     // connection information
     var infoContainer = document.createElement('div');
-    infoContainer.className = 'guppy-irc-info-container guppy-irc-info-'+this.config.id+'-container';
+    infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
     container.appendChild(infoContainer);
 
     // textarea
     var textarea = document.createElement('textarea');
-    textarea.className = 'guppy-irc-textarea guppy-irc-'+this.config.id+'-textarea';
-    textarea.name = 'guppy-irc-'+this.config.id;
+    textarea.className = 'guppy-irc-textarea guppy-irc-' + this.config.id + '-textarea';
+    textarea.name = 'guppy-irc-' + this.config.id;
     textarea.cols = this.config.width;
     textarea.rows = this.config.height;
+    textarea.wrap = 'soft';
     textarea.maxlength = 0;
     textarea.readonly = 'readonly';
     var textareaContainer = document.createElement('div');
-    textareaContainer.className = 'guppy-irc-textarea-container guppy-irc-'+this.config.id+'-textarea-container';
+    textareaContainer.className = 'guppy-irc-textarea-container guppy-irc-' + this.config.id + '-textarea-container';
     textareaContainer.appendChild(textarea);
     container.appendChild(textareaContainer);
 
     // input
     var input = document.createElement('input');
-    input.className = 'guppy-irc-input guppy-irc-'+this.config.id+'-input';
+    input.className = 'guppy-irc-input guppy-irc-' + this.config.id + '-input';
     var inputContainer = document.createElement('div');
-    inputContainer.className = 'guppy-irc-input-container guppy-irc-'+this.config.id+'-input-container';
+    inputContainer.className = 'guppy-irc-input-container guppy-irc-' + this.config.id + '-input-container';
     inputContainer.appendChild(input);
 
     // submit button
     var submit = document.createElement('input');
-    submit.className = 'guppy-irc-submit-button guppy-irc-'+this.config.id+'-submit-button';
+    submit.className = 'guppy-irc-submit-button guppy-irc-' + this.config.id + '-submit-button';
     submit.type = 'submit';
     submit.name = 'Send';
     submit.value = 'Send';
-    submit.id = 'guppy-irc-'+this.config.id+'-submit-button';
+    submit.id = 'guppy-irc-' + this.config.id + '-submit-button';
     var submitContainer = document.createElement('div');
-    submitContainer.className = 'guppy-irc-submit-button-container guppy-irc-'+this.config.id+'-submit-button-container';
+    submitContainer.className = 'guppy-irc-submit-button-container guppy-irc-' + this.config.id + '-submit-button-container';
     submitContainer.appendChild(submit);
 
     // controls - contain input and submit button
     var controlsContainer = document.createElement('div');
-    controlsContainer.className = 'guppy-irc-controls-container guppy-irc-'+this.config.id+'-controls-container';
+    controlsContainer.className = 'guppy-irc-controls-container guppy-irc-' + this.config.id + '-controls-container';
     controlsContainer.appendChild(inputContainer);
     controlsContainer.appendChild(submitContainer);
     container.appendChild(controlsContainer);
 
+    this.widgetElement = container;
     document.body.appendChild(container);
   };
 
   var tags = document.getElementsByTagName('guppy-irc');
-  console.log('Guppy tags: '+typeof tags, tags);
+  console.log('Guppy tags: ' + typeof tags, tags);
   // foreach tag we create a separate object instance, this way multiple embeds
   // are supported on the same page.
   for (var i = 0, len = tags.length; i < len; i = i + 1) {
     try {
       instances.push(new Guppy(tags[i]));
     } catch (e) {
-      console.log(app + ' ERROR: '+e);
+      console.log(app + ' ERROR: ' + e);
     }
   }
 

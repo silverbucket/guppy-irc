@@ -258,7 +258,6 @@
     var inputContainer = document.createElement('div');
     inputContainer.className = 'guppy-irc-input-container guppy-irc-'+this.config.id+'-input-container';
     inputContainer.appendChild(input);
-    container.appendChild(inputContainer);
 
     // submit button
     var submit = document.createElement('input');
@@ -270,7 +269,13 @@
     var submitContainer = document.createElement('div');
     submitContainer.className = 'guppy-irc-submit-button-container guppy-irc-'+this.config.id+'-submit-button-container';
     submitContainer.appendChild(submit);
-    container.appendChild(submitContainer);
+
+    // controls - contain input and submit button
+    var controlsContainer = document.createElement('div');
+    controlsContainer.className = 'guppy-irc-controls-container guppy-irc-'+this.config.id+'-controls-container';
+    controlsContainer.appendChild(inputContainer);
+    controlsContainer.appendChild(submitContainer);
+    container.appendChild(controlsContainer);
 
     document.body.appendChild(container);
   };

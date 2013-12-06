@@ -178,6 +178,17 @@
     return this;
   };
 
+  /**
+   * Function: setError
+   *
+   * Handles logging the error and setting the objects state.
+   *
+   * Parameters:
+   *
+   *   err - error message
+   *   obj - option error object, if applicable
+   *
+   */
   Guppy.prototype.setError = function (err, obj) {
     if (typeof obj === 'object') {
       console.log(this.log_id + ' ERROR: ' + this.errMsg, obj);
@@ -188,10 +199,22 @@
     this.setState('error');
   };
 
+  /**
+   * Function: setState
+   *
+   * Handles setting and emitting the objects state.
+   *
+   * Parameters:
+   *
+   *   state - string describing state. valid strings:
+   *           'initializing', 'error', 'connected', 'disconnected'
+   *
+   */
   Guppy.prototype.setState = function (state) {
     // FIXME: switch to emitters
     this.state = state;
   };
+
 
   var tags = document.getElementsByTagName('guppy-irc');
   console.log('Guppy tags: '+typeof tags, tags);

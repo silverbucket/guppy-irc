@@ -14,8 +14,8 @@ To use guppy-irc you must include a few `.js` files, a `.css` file, and define t
     ...
     <guppy-irc  id="myGuppy"
                 data-title="Welcome to Guppy IRC"
-                data-width="80"
-                data-height="28"
+                data-width="640"
+                data-height="280"
                 data-server="<irc_server>"
                 data-channel="*<#irc_channel>"
                 data-nick="guppy_user"

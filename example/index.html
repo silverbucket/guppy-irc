@@ -3,17 +3,27 @@
   <head>
     <title>Guppy IRC example</title>
   </head>
+  <meta charset="UTF-8">
   <link rel="stylesheet" href="../src/css/guppy-irc.css" />
 <body>
   <h1>Guppy IRC example</h1>
-  <guppy-irc data-width="160"
+  <guppy-irc id="myGuppy"
+             data-width="160"
              data-height="48"
              data-server="irc.freenode.net"
-             data-channel="#sockethub">
+             data-channel="#sockethub"
+             data-nick="guppy_user"
+             data-display-name="Guppy Example User"
+             data-password=""
+             data-sockethub-host="silverbucket.net"
+             data-sockethub-port="443"
+             data-sockethub-tls="true"
+             data-sockethub-path="/sockethub"
+             data-sockethub-secret="1234567890">
   Title of widget
   </guppy-irc>
 
-  <script src="../src/js/guppy-irc.js"></script>
   <script src="sockethub-client/sockethub-client.js"></script>
+  <script src="../src/js/guppy-irc.js"></script>
 </body>
 </html>

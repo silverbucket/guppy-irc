@@ -532,7 +532,6 @@
       return false;
     }
 
-    console.log('sending '+message);
     self.sockethubClient.sendObject({
       verb: 'send',
       platform: 'irc',
@@ -546,7 +545,6 @@
     }).then(function () {
       // completed
       // add name to message output
-      console.log('success');
       self.displayMessage({
         actor: {
           address: self.actor.address,

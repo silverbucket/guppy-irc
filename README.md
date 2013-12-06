@@ -83,46 +83,57 @@ The following is a list of all the css elements for a guppy-irc widget. Allowing
 you to create your own theme css files.
 
 #### parent container
-`.guppy-irc-container` - parent container of widget contents.
+  `.guppy-irc-container` - parent container of widget contents.
 
 
 #### title
-`.guppy-irc-title-container` - div containing title
-`.guppy-irc-title` - actual title element (an *h1* tag)
+  `.guppy-irc-title-container` - div containing title
+  
+  `.guppy-irc-title` - actual title element (an *h1* tag)
 
 
 #### info
-`.guppy-irc-info` - contains information text *(not used yet)*
+  `.guppy-irc-info` - contains information text *(not used yet)*
 
 
 #### messages
-`.guppy-irc-messages-container` - container of all messages
-`.guppy-irc-message-line` - a single message line
-`.guppy-irc-message-nick` - the nick of a message
-`.guppy-irc-message-nick-decorator` - the decorator (ie. : separator) of the nick -> text
+  `.guppy-irc-messages-container` - container of all messages
+  
+  `.guppy-irc-message-line` - a single message line
+  
+  `.guppy-irc-message-nick` - the nick of a message
+  
+  `.guppy-irc-message-nick-decorator` - the decorator (ie. : separator) of the nick -> text
 
-##### messages addressed to you
+##### - messages addressed to you
 The same assignments as above except only added to elements where the text contains your IRC nick.
-`.guppy-irc-message-line-to-me`
-`.guppy-irc-message-nick-to-me`
-`.guppy-irc-message-nick-decorator-to-me`
-`.guppy-irc-message-nick-to-me`
+  `.guppy-irc-message-line-to-me`
+  
+  `.guppy-irc-message-nick-to-me`
+  
+  `.guppy-irc-message-nick-decorator-to-me`
+  
+  `.guppy-irc-message-nick-to-me`
 
 
 #### controls
 The various inputs, buttons, etc.
-`.guppy-irc-controls-container` - contains all controls
+  `.guppy-irc-controls-container` - contains all controls
 
-`.guppy-irc-input-container` - the input container
-`.guppy-irc-input` - input form element
-
-`.guppy-irc-submit-button-container` - send buttong container
-`.guppy-irc-submit-button` - submit button element *(not functional yet)*
+  `.guppy-irc-input-container` - the input container
+  
+  `.guppy-irc-input` - input form element
+  
+  `.guppy-irc-submit-button-container` - send buttong container
+  
+  `.guppy-irc-submit-button` - submit button element *(not functional yet)*
 
 #### system messages
 When Guppy needs to speak, it prints out messages in the message container.
-`.guppy-irc-error-line` - line containing error message
-`.guppy-irc-status-line` - line containing status message
+
+  `.guppy-irc-error-line` - line containing error message
+  
+  `.guppy-irc-status-line` - line containing status message
 
 
 **NOTE**: Each widget's id tag also serves as it's own namespaced set of CSS

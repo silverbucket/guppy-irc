@@ -8,26 +8,29 @@ use
 
 To use guppy-irc you must include a few `.js` files and define the guppy widget:
 
+```html
+  <link rel="stylesheet" href="guppy-irc.css" />
   ...
   <guppy-irc id="myGuppy"
              data-title="Welcome to Guppy IRC"
-             data-width="80"
-             data-height="28"
-             data-server="*[irc server hostname]*"
-             data-channel="*[#irc_channel]*"
+             data-width="640"
+             data-height="280"
+             data-server="<irc_server>"
+             data-channel="<#irc_channel>"
              data-nick="guppy"
              data-display-name="Guppy Example User"
              data-password=""
-             data-sockethub-host="*[sockethub hostname]*"
-             data-sockethub-port="*[port number]*"
-             data-sockethub-tls="*[true | false]*"
-             data-sockethub-path="*[/path]*"
-             data-sockethub-secret="*[connect string]*" />
+             data-sockethub-host="<sockethub_hostname>"
+             data-sockethub-port="<port_number>"
+             data-sockethub-tls="<true|false>"
+             data-sockethub-path="*<uri_path>"
+             data-sockethub-secret="<register_string>" />
 
   ...
-  <script src="sockethub-client/sockethub-client.js"></script>
-  <script src="../src/js/guppy-irc.js"></script>
+  <script src="sockethub-client.js"></script>
+  <script src="guppy-irc.js"></script>
   ...
+```
 
 dependencies
 ============

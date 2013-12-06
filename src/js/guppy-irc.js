@@ -652,7 +652,8 @@
     this.DOMElements.input = input;
     this.DOMElements.submit = submit;
     this.DOMElements.messagesContainer = messagesContainer;
-    document.body.appendChild(container);
+
+    e.parentNode.replaceChild(container, e);
   };
 
   var tags = document.getElementsByTagName('guppy-irc');

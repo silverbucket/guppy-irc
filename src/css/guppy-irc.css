@@ -63,3 +63,8 @@ guppy-irc {
 .guppy-irc-submit-button-container {
   float: right;
 }
+
+/* error lines */
+.guppy-irc-error-line {
+  color: red;
+}

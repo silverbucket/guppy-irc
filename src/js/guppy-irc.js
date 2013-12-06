@@ -404,8 +404,6 @@
     messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
     messagesContainer.style.width = this.config.width + 'px';
     messagesContainer.style.height = this.config.height + 'px';
-    messagesContainer.style.overflow = 'auto';
-    messagesContainer.style.border = '1px solid grey';
     container.appendChild(messagesContainer);
 
     // input

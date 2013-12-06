@@ -25,6 +25,12 @@ guppy-irc {
   display: inline-block;
 }
 
+/* messages container */
+.guppy-irc-messages-container {
+  overflow: auto;
+  border: 1px solid black;
+  display: inline-block;
+}
 /* controls container */
 .guppy-irc-controls-container {
   margin: 1% 0 1% 0;

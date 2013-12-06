@@ -4,3 +4,7 @@ guppy-irc {
   padding: 0;
   margin: 0;
 }
+
+.guppy-irc-container {
+  border: 1px solid black;
+}

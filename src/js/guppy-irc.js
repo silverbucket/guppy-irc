@@ -123,6 +123,16 @@
     return cfg;
   }
 
+  function getUID(key) {
+    var uid = window.localStorage.getItem(key);
+    if (!uid) {
+      // generate random number
+      uid = Math.floor((Math.random()*99999)+10000);
+      window.localStorage.setItem(key, uid);
+    }
+    return uid;
+  }
+
   /**
    * Contructor: Guppy
    *
@@ -147,7 +157,10 @@
     self.DOMElements = {};
     self.DOMElements.original = e;
 
-    console.log('NEW GUPPY ' + self.id + ':', self.config);
+    self.uid = getUID(self.log_id);
+    self.config.nick = self.config.nick + '-' + self.uid; // make sure each user is unique
+
+    console.log('NEW GUPPY ' + self.id + ' uid: ' + self.uid + ' :', self.config);
 
     //
     // after we've connected to sockethub, initIRC handles the credentials and

@@ -306,6 +306,8 @@
     } else {
       console.log(this.log_id + ' ERROR: ' + this.errMsg);
     }
+    self.DOMElements.textarea.value = self.DOMElements.textarea.value + '\n' +
+              ' --- Guppy ERROR: ' + errMsg + ' --- ';
     this.errMsg = err;
     this.setState('error');
   };

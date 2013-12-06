@@ -339,11 +339,11 @@
     var uid = window.localStorage.getItem(key);
     if (!uid) {
       // generate random number
-      uid = Math.floor((Math.random()*99999)+10000);
+      uid = Math.floor((Math.random() * 99999) + 10000);
       window.localStorage.setItem(key, uid);
     }
 
-    var sid = md5(uid+cfg.sockethub.uid);
+    var sid = md5(uid + cfg.sockethub.uid);
     var idSpace =  16 - cfg.nick.length;
     var u_nick = cfg.nick + sid.substr(sid.length - idSpace);
 

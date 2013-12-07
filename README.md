@@ -145,3 +145,7 @@ So, while `.guppy-irc-message-container` applies to any Guppy widget,
 `.guppy-irc-myGuppy-message-container` applies only to the Guppy widget
 instance with that `id` tag value of `myGuppy`.
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/silverbucket/guppy-irc/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

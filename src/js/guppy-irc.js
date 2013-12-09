@@ -236,7 +236,6 @@
   function getSockethubClient (sockethub, cb) {
     var log_id = app + ':' + sockethub.uid;
 
-
     //
     // TODO
     // emit a message when events happen to the sockethub client so that
@@ -254,7 +253,8 @@
       });
 
       sockethubClient.on('failed', function (err) {
-        cb('connection to sockethub failed: ' + err);
+        if (!err) { err = ''; }
+        cb('connection to sockethub failed. ' + err);
       });
 
       sockethubClient.on('disconnected', function () {
@@ -392,6 +392,7 @@
       // got sockethub client object (sc)
       if (err) {
         self.setError(err);
+        return;
       } else {
         self.sockethubClient = sc;
       }
@@ -642,14 +643,14 @@
    */
   Guppy.prototype.setError = function (err, obj) {
     if (typeof obj === 'object') {
-      console.log(this.log_id + ' ERROR: ' + this.errMsg, obj);
+      console.log(this.log_id + ' ERROR: ' + err, obj);
     } else {
-      console.log(this.log_id + ' ERROR: ' + this.errMsg);
+      console.log(this.log_id + ' ERROR: ' + err);
     }
 
     this.errMsg = err;
     this.setState('error');
-    this.displaySystemMessage('error', errMsg);
+    this.displaySystemMessage('error', err);
   };
 
   /**

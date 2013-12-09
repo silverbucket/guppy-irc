@@ -235,6 +235,8 @@
   var sockethubClients = {}; // index of sockethub client connection objects
   function getSockethubClient (sockethub, cb) {
     var log_id = app + ':' + sockethub.uid;
+    var alreadyConnected = false; // if the registered event fires after a
+                                  // reconnected, we don't want to call the cb()
 
     //
     // TODO
@@ -245,11 +247,19 @@
       cb(null, sockethubClients[sockethub.uid]);
     } else {
       // no existing sockethub connection, so let's connect!
-      var sockethubClient = SockethubClient.connect(sockethub.connectString, { register: { secret: sockethub.secret }, reconnect: true });
+      var sockethubClient = SockethubClient.connect(sockethub.connectString, {
+                              register: {
+                                secret: sockethub.secret
+                              }, reconnect: true
+                            });
+
       sockethubClient.on('registered', function () {
         // connected and registered to sockethub
-        sockethubClients[sockethub.uid] = sockethubClient;
-        cb(null, sockethubClients[sockethub.uid]);
+        if (!alreadyConnected) {
+          sockethubClients[sockethub.uid] = sockethubClient;
+          alreadyConnected = true;
+          cb(null, sockethubClients[sockethub.uid]);
+        }
       });
 
       sockethubClient.on('failed', function (err) {
@@ -412,32 +422,44 @@
         actor: self.actor
       };
 
-      sc.set('irc', {
-        credentials: credentialObject
-      }).then(function () {
-        // successful set credentials
-        console.log(self.log_id + ' set credentials!');
-        return sc.sendObject({
-          verb: 'update',
-          platform: 'irc',
-          actor: self.actor,
-          target: []
+      function joinRooms() {
+        sc.set('irc', {
+          credentials: credentialObject
+        }).then(function () {
+          // successful set credentials
+          console.log(self.log_id + ' set credentials!');
+          return sc.sendObject({
+            verb: 'update',
+            platform: 'irc',
+            actor: self.actor,
+            target: []
+          });
+        }).then(function () {
+          console.log(self.log_id + ' connected to ' + self.config.channel);
+          self.displaySystemMessage('status', 'connected to ' + self.config.server +
+                                              ' on channel ' + self.config.channel);
+          self.setState('connected');
+        }, function (err) {
+          // error setting credentials
+          self.setError(err.message, 'Sockethub Error: ' + err);
         });
-      }).then(function () {
-        console.log(self.log_id + ' connected to ' + self.config.channel);
-        self.displaySystemMessage('status', 'connected to ' + self.config.server +
-                                            ' on channel ' + self.config.channel);
-        self.setState('connected');
-      }, function (err) {
-        // error setting credentials
-        self.setError(err.message, 'Sockethub Error: ' + err);
-      });
+      }
+      joinRooms();
 
       sc.on('message', function (obj) {
         if ((obj.platform === 'irc') &&
             (obj.verb === 'send')) {
           self.displayMessage(obj);
         }
+      });
+
+      sc.on('reconnecting', function () {
+        self.displaySystemMessage('error', 'disconnected from sockethub... attempting to reconnect.');
+      });
+
+      sc.on('reconnected', function () {
+        self.displaySystemMessage('status', 'reconnected to sockethub.');
+        joinRooms();
       });
     }
 

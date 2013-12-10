@@ -540,10 +540,10 @@
     var messageLine = document.createElement('p');
     if (type === 'error') {
       messageLine.className = 'guppy-irc-error-line guppy-irc-' + this.config.id + '-error-line';
-      messageLine.innerHTML = '----: ERROR: ' + text;
+      messageLine.innerHTML = 'ERROR: ' + text;
     } else {
       messageLine.className = 'guppy-irc-status-line guppy-irc-' + this.config.id + '-status-line';
-      messageLine.innerHTML = '----: ' + text;
+      messageLine.innerHTML = text;
     }
     this.writeToMessageContainer(messageLine);
   };

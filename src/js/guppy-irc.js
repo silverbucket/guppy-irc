@@ -890,8 +890,12 @@ console.log('self.actor - ', self.actor);
     // message area
     var messagesContainer = document.createElement('div');
     messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
-    messagesContainer.style.width = this.config.width;
-    messagesContainer.style.height = this.config.height;
+    if (this.config.width) {
+      messagesContainer.style.width = this.config.width + 'px';
+    }
+    if (this.config.height) {
+      messagesContainer.style.height = this.config.height + 'px';
+    }
     container.appendChild(messagesContainer);
 
     // message input

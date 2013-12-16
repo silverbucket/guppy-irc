@@ -1060,7 +1060,6 @@
                          firstChild.firstChild.firstChild.innerHTML = '';
       } catch (e) {
         // ignore...
-
       }
       this.DOMElements.historyContainer = historyContainer;
 

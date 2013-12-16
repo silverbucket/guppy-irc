@@ -300,6 +300,7 @@
     cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
     cfg.enableNickChange = e.getAttribute('data-enable-nick-change');
     cfg.enableHistory = e.getAttribute('data-enable-history');
+    cfg.enableUserList= e.getAttribute('data-enable-user-list');
     cfg.displayName = e.getAttribute('data-display-name') || 'Guppy User';
     cfg.password = e.getAttribute('data-password');
     cfg.autoconnect = e.getAttribute('data-autoconnect');
@@ -319,6 +320,12 @@
       cfg.enableHistory = false;
     } else {
       cfg.enableHistory = true;
+    }
+
+    if (cfg.enableUserList === 'false') {
+      cfg.enableUserList = false;
+    } else {
+      cfg.enableUserList = true;
     }
 
     if ((typeof cfg.password === 'string') && (cfg.password === '')) {
@@ -888,6 +895,9 @@
 
   var userList = [];
   Guppy.prototype.populateUserList = function (rem, add) {
+    if (!this.config.enableUserList) {
+      return false;
+    }
     var i = 0,
         j = 0,
         u = userList;
@@ -1000,13 +1010,15 @@
     }
     middleContainer.appendChild(messagesContainer);
 
-    // user list
-    var userListContainer = document.createElement('div');
-    userListContainer.className = 'guppy-irc-user-list-container guppy-irc-' + this.config.id + '-user-list-container';
-    if (this.config.height) {
-      userListContainer.style.height = this.config.height + 'px';
+    if (this.config.enableUserList) {
+      // user list
+      var userListContainer = document.createElement('div');
+      userListContainer.className = 'guppy-irc-user-list-container guppy-irc-' + this.config.id + '-user-list-container';
+      if (this.config.height) {
+        userListContainer.style.height = this.config.height + 'px';
+      }
+      middleContainer.appendChild(userListContainer);
     }
-    middleContainer.appendChild(userListContainer);
 
     container.appendChild(middleContainer);
 

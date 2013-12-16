@@ -19,6 +19,7 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
              data-nick="guppy"
              data-enable-nick-change="<true|false>"
              data-enable-history="<true|false>"
+             data-enable-user-list="<true|false>"
              data-display-name="Guppy Example User"
              data-password=""
              data-sockethub-host="<sockethub_hostname>"

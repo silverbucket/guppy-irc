@@ -92,8 +92,17 @@ you to create your own theme css files.
 
 #### info
 
-  * `.guppy-irc-info` - contains information text *(not used yet)*
+  * `.guppy-irc-info-container` - contains information text, nickname information
 
+##### nickname
+
+  * `.guppy-irc-nick-change-input-container`
+
+  * `.guppy-irc-nick-change-input`
+
+  * `.guppy-irc-nick-change-submit-container`
+
+  * `.guppy-irc-nick-change-submit`
 
 #### messages
 
@@ -122,13 +131,13 @@ The various inputs, buttons, etc.
 
   * `.guppy-irc-controls-container` - contains all controls
 
-  * `.guppy-irc-input-container` - the input container
+  * `.guppy-irc-message-input-container` - the input container
 
-  * `.guppy-irc-input` - input form element
+  * `.guppy-irc-message-input` - input form element
 
-  * `.guppy-irc-submit-button-container` - send buttong container
+  * `.guppy-irc-message-submit-button-container` - send buttong container
 
-  * `.guppy-irc-submit-button` - submit button element *(not functional yet)*
+  * `.guppy-irc-message-submit-button` - submit button element *(not functional yet)*
 
 #### system messages
 When Guppy needs to speak, it prints out messages in the message container.

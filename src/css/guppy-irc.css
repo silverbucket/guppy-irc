@@ -25,17 +25,23 @@ guppy-irc {
   margin: 1% 0 1% 0;
 }
 
-/* nick change */
-.guppy-irc-nick-change-container {
+/* nick change input */
+.guppy-irc-nick-change-input-container {
   display: inline-block;
-  width: 99%;
+  width: 85%;
   padding: 0 1% 0 0;
 }
-.guppy-irc-nick-change {
-  width: 80%;
+.guppy-irc-nick-change-input {
+  width: 86%;
+  border: 1px solid lightgrey;
 }
-.guppy-irc-nick-change-container::before {
+.guppy-irc-nick-change-input-container::before {
   content: 'nickname: ';
+}
+
+/* nick change submit button */
+.guppy-irc-nick-change-submit-button-container {
+  float: right;
 }
 
 
@@ -63,18 +69,23 @@ guppy-irc {
   margin: 1% 0 1% 0;
 }
 
-/* input */
-.guppy-irc-input-container {
+/* message input */
+.guppy-irc-message-input-container {
   display: inline-block;
-  width: 80%;
+  width: 85%;
   padding: 0 1% 0 0;
 }
-.guppy-irc-input {
-  width: 100%;
+.guppy-irc-message-input {
+  width: 86%;
+  border: 1px solid #666;
+}
+.guppy-irc-message-input-container::before {
+  content: 'message: ';
 }
 
-/* send button */
-.guppy-irc-submit-button-container {
+
+/* message submit button */
+.guppy-irc-message-submit-button-container {
   float: right;
 }
 

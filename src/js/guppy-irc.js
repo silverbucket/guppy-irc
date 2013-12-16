@@ -528,42 +528,53 @@
     self.buildWidget();
     self.displaySystemMessage('status', 'connecting to ' + self.config.server + ' ...');
 
+
+    //
+    // EVENTS
+    //
+
     //
     // listen for input submition text
     function onInput(event) {
       event.which = event.which || event.keyCode;
-      if (event.which === 13) {
+      if ((event.which === 13) ||
+         (event.type === 'click')) {
         //console.log('got enter!!', event);
         // send message
-        self.DOMElements.input.disabled = true;
-        var text = self.DOMElements.input.value;
-        self.DOMElements.input.value = '';
+        self.DOMElements.messageInput.disabled = true;
+        var text = self.DOMElements.messageInput.value;
+        self.DOMElements.messageInput.value = '';
         self.sendMessage(text);
-        self.DOMElements.input.disabled = false;
+        self.DOMElements.messageInput.disabled = false;
       }
     }
-    self.DOMElements.input.addEventListener('keyup', onInput);
+    self.DOMElements.messageInput.addEventListener('keyup', onInput);
+    self.DOMElements.messageSubmit.addEventListener('click', onInput);
 
     //
     // listen for nickchange submition
     function onNickChange(event) {
       event.which = event.which || event.keyCode;
-      if (event.which === 13) {
+      if ((event.which === 13) ||
+         (event.type === 'click')) {
         //console.log('got enter!!', event);
         if (nick === self.actor.address) {
           // nothing to change
           return;
         }
         // send message
-        self.DOMElements.nickChange.disabled = true;
-        var nick = self.DOMElements.nickChange.value;
+        self.DOMElements.nickChangeInput.disabled = true;
+        var nick = self.DOMElements.nickChangeInput.value;
         self.changeNick(nick);
-        self.DOMElements.nickChange.disabled = false;
+        self.DOMElements.nickChangeInput.disabled = false;
       }
     }
     if (this.config.allowNickChange) {
-      self.DOMElements.nickChange.addEventListener('keyup', onNickChange);
+      self.DOMElements.nickChangeInput.addEventListener('keyup', onNickChange);
+      self.DOMElements.nickChangeSubmit.addEventListener('click', onNickChange);
     }
+
+
 
     return this;
   };
@@ -752,7 +763,7 @@ console.log('self.actor - ', self.actor);
     if (!nick) {
       return false;
     }
-    self.DOMElements.input.disabled = true;
+    self.DOMElements.messageInput.disabled = true;
 
     var obj = {
       verb: 'update',
@@ -773,12 +784,12 @@ console.log('self.actor - ', self.actor);
       console.log('changeNick return as success: ', obj);
       console.log('SELF: ', self);
       self.setNick(nick);
-      self.DOMElements.input.disabled = false;
+      self.DOMElements.messageInput.disabled = false;
     }, function (err) {
       console.log('changeNick return as error: ', err);
       // error
       self.setError(err.message, err);
-      self.DOMElements.input.disabled = false;
+      self.DOMElements.messageInput.disabled = false;
     });
   };
 
@@ -849,17 +860,30 @@ console.log('self.actor - ', self.actor);
 
     // info container
     var infoContainer = document.createElement('div');
-    var nickChange;  // declare in this scope so we can attach to dom lookup (below)
+    var nickChangeInput, nickChangeSubmit;  // declare in this scope so we can attach to dom lookup (below)
     infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
     if (this.config.allowNickChange) {
-      // nick change
-      nickChange = document.createElement('input');
-      nickChange.value = this.config.nick;
-      nickChange.className = 'guppy-irc-nick-change guppy-irc-' + this.config.id + '-nick-change';
-      var nickChangeContainer = document.createElement('div');
-      nickChangeContainer.className = 'guppy-irc-nick-change-container guppy-irc-' + this.config.id + '-nick-change-container';
-      nickChangeContainer.appendChild(nickChange);
-      infoContainer.appendChild(nickChangeContainer);
+      // nick change input
+      nickChangeInput = document.createElement('input');
+      nickChangeInput.value = this.config.nick;
+      nickChangeInput.className = 'guppy-irc-nick-change-input guppy-irc-' + this.config.id + '-nick-change-input';
+      var nickChangeInputContainer = document.createElement('div');
+      nickChangeInputContainer.className = 'guppy-irc-nick-change-input-container guppy-irc-' + this.config.id + '-nick-change-input-container';
+      nickChangeInputContainer.appendChild(nickChangeInput);
+
+      // nick change submit button
+      nickChangeSubmit = document.createElement('input');
+      nickChangeSubmit.className = 'guppy-irc-message-submit-button guppy-irc-' + this.config.id + '-message-submit-button';
+      nickChangeSubmit.type = 'submit';
+      nickChangeSubmit.name = 'Change';
+      nickChangeSubmit.value = 'Change';
+      nickChangeSubmit.id = 'guppy-irc-' + this.config.id + '-message-submit-button';
+      var nickChangeSubmitContainer = document.createElement('div');
+      nickChangeSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
+      nickChangeSubmitContainer.appendChild(nickChangeSubmit);
+
+      infoContainer.appendChild(nickChangeInputContainer);
+      infoContainer.appendChild(nickChangeSubmitContainer);
     }
     container.appendChild(infoContainer);
 
@@ -870,35 +894,36 @@ console.log('self.actor - ', self.actor);
     messagesContainer.style.height = this.config.height + 'px';
     container.appendChild(messagesContainer);
 
-    // input
-    var input = document.createElement('input');
-    input.className = 'guppy-irc-input guppy-irc-' + this.config.id + '-input';
-    var inputContainer = document.createElement('div');
-    inputContainer.className = 'guppy-irc-input-container guppy-irc-' + this.config.id + '-input-container';
-    inputContainer.appendChild(input);
+    // message input
+    var messageInput = document.createElement('input');
+    messageInput.className = 'guppy-irc-message-input guppy-irc-' + this.config.id + '-input';
+    var messageInputContainer = document.createElement('div');
+    messageInputContainer.className = 'guppy-irc-message-input-container guppy-irc-' + this.config.id + '-message-input-container';
+    messageInputContainer.appendChild(messageInput);
 
-    // submit button
-    var submit = document.createElement('input');
-    submit.className = 'guppy-irc-submit-button guppy-irc-' + this.config.id + '-submit-button';
-    submit.type = 'submit';
-    submit.name = 'Send';
-    submit.value = 'Send';
-    submit.id = 'guppy-irc-' + this.config.id + '-submit-button';
-    var submitContainer = document.createElement('div');
-    submitContainer.className = 'guppy-irc-submit-button-container guppy-irc-' + this.config.id + '-submit-button-container';
-    submitContainer.appendChild(submit);
+    // message submit button
+    var messageSubmit = document.createElement('input');
+    messageSubmit.className = 'guppy-irc-message-submit-button guppy-irc-' + this.config.id + '-message-submit-button';
+    messageSubmit.type = 'submit';
+    messageSubmit.name = 'Send';
+    messageSubmit.value = 'Send';
+    messageSubmit.id = 'guppy-irc-' + this.config.id + '-message-submit-button';
+    var messageSubmitContainer = document.createElement('div');
+    messageSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
+    messageSubmitContainer.appendChild(messageSubmit);
 
     // controls - contain input and submit button
     var controlsContainer = document.createElement('div');
     controlsContainer.className = 'guppy-irc-controls-container guppy-irc-' + this.config.id + '-controls-container';
-    controlsContainer.appendChild(inputContainer);
-    controlsContainer.appendChild(submitContainer);
+    controlsContainer.appendChild(messageInputContainer);
+    controlsContainer.appendChild(messageSubmitContainer);
     container.appendChild(controlsContainer);
 
     this.DOMElements.widget = container;
-    this.DOMElements.nickChange = nickChange;
-    this.DOMElements.input = input;
-    this.DOMElements.submit = submit;
+    this.DOMElements.nickChangeInput = nickChangeInput;
+    this.DOMElements.nickChangeSubmit = nickChangeSubmit;
+    this.DOMElements.messageInput = messageInput;
+    this.DOMElements.messageSubmit = messageSubmit;
     this.DOMElements.messagesContainer = messagesContainer;
 
     e.parentNode.replaceChild(container, e);

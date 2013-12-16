@@ -5,32 +5,77 @@ guppy-irc {
   margin: 0;
 }
 
+/*
+ * LAYOUT
+ */
+
+
 /* widget container */
 .guppy-irc-container {
   border: 1px solid black;
   display: inline-block;
   padding: .5%;
 }
-
-/* title */
+/* title container */
 .guppy-irc-title-container {
   text-align: center;
 }
-.guppy-irc-title {
-  font-size: 1.5em;
-}
-
 /* info container */
 .guppy-irc-info-container {
   margin: 1% 0 1% 0;
 }
-
-/* nick change input */
+/* nick change container */
 .guppy-irc-nick-change-input-container {
   display: inline-block;
   width: 85%;
   padding: 0 1% 0 0;
 }
+/* middle container */
+.guppy-irc-middle-container {
+  margin: auto;
+  display: inline-block;
+}
+/* messages container */
+.guppy-irc-messages-container {
+  overflow: auto;
+  border: 1px solid black;
+  display: inline-block;
+  float: left;
+  margin-right: 5px;
+}
+/* user list container */
+.guppy-irc-user-list-container {
+  overflow: auto;
+  border: 1px solid lightgrey;
+  display: inline-block;
+  min-width: 90px;
+  padding: 2px;
+}
+.guppy-irc-user-list-container::before {
+  content: ' user list  ';
+  color: #666;
+  margin-bottom: 20px;
+  display: block;
+  text-decoration: underline;
+  text-align: center;
+}
+/* controls container */
+.guppy-irc-controls-container {
+  margin: 1% 0 1% 0;
+}
+
+
+
+/*
+ * ELEMENTS
+ */
+
+/* title */
+.guppy-irc-title {
+  font-size: 1.5em;
+}
+
+/* nick change input */
 .guppy-irc-nick-change-input {
   width: 86%;
   border: 1px solid lightgrey;
@@ -38,7 +83,6 @@ guppy-irc {
 .guppy-irc-nick-change-input-container::before {
   content: 'nickname: ';
 }
-
 /* nick change submit button */
 .guppy-irc-nick-change-submit-button-container {
   float: right;
@@ -51,11 +95,6 @@ guppy-irc {
 }
 
 /* messages */
-.guppy-irc-messages-container {
-  overflow: auto;
-  border: 1px solid black;
-  display: inline-block;
-}
 .guppy-irc-message-line {
   margin: 0;
 }
@@ -69,9 +108,10 @@ guppy-irc {
   color: brown;
 }
 
-/* controls container */
-.guppy-irc-controls-container {
-  margin: 1% 0 1% 0;
+/* user list entry */
+.guppy-irc-user-list-entry {
+  margin: 0;
+  white-space: nowrap;
 }
 
 /* message input */
@@ -87,7 +127,6 @@ guppy-irc {
 .guppy-irc-message-input-container::before {
   content: 'message: ';
 }
-
 
 /* message submit button */
 .guppy-irc-message-submit-button-container {

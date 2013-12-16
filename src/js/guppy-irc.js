@@ -298,7 +298,8 @@
     cfg.server = e.getAttribute('data-server') || 'irc.freenode.net';
     cfg.channel = e.getAttribute('data-channel') || '#sockethub';
     cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
-    cfg.allowNickChange = e.getAttribute('data-allow-nick-change');
+    cfg.enableNickChange = e.getAttribute('data-enable-nick-change');
+    cfg.enableHistory = e.getAttribute('data-enable-history');
     cfg.displayName = e.getAttribute('data-display-name') || 'Guppy User';
     cfg.password = e.getAttribute('data-password');
     cfg.autoconnect = e.getAttribute('data-autoconnect');
@@ -308,10 +309,16 @@
       cfg.autoconnect = false;
     }
 
-    if (cfg.allowNickChange === 'false') {
-      cfg.allowNickChange = false;
+    if (cfg.enableNickChange === 'false') {
+      cfg.enableNickChange = false;
     } else {
-      cfg.allowNickChange = true;
+      cfg.enableNickChange = true;
+    }
+
+    if (cfg.enableHistory === 'false') {
+      cfg.enableHistory = false;
+    } else {
+      cfg.enableHistory = true;
     }
 
     if ((typeof cfg.password === 'string') && (cfg.password === '')) {
@@ -417,9 +424,7 @@
         self.sockethubClient = sc;
       }
 
-
       function joinRooms() {
-
         // set our credentials for the sockethub platform
         // (does not activate the IRC session, just stores the data)
         var credentialObject = {};
@@ -451,6 +456,18 @@
           self.displaySystemMessage('status', 'connected to ' + self.config.server +
                                               ' on channel ' + self.config.channel);
           self.setState('connected');
+
+          return sc.sendObject({
+            verb: 'observe',
+            platform: 'irc',
+            actor: self.actor,
+            target: [{
+              address: self.config.channel
+            }],
+            object: {
+              objectType: 'attendance'
+            }
+          });
         }, function (err) {
           // error setting credentials
           self.setError(err.message, 'Sockethub Error: ' + err);
@@ -475,6 +492,11 @@
             break;
           case 'join':
             self.displaySystemMessage('status', m.actor.address + ' has joined ' + m.target[0].address);
+            self.populateUserList(null, [m.actor.address]);
+            break;
+          case 'leave':
+            self.displaySystemMessage('status', m.actor.address + ' has left ' + m.target[0].address);
+            self.populateUserList(null, [m.actor.address]);
             break;
           case 'update':
             switch (m.object.objectType) {
@@ -482,6 +504,10 @@
                 self.displaySystemMessage('status', m.actor.address + ' has set the topic of ' + m.target[0].address + ' to: ' + m.object.topic);
                 break;
               case 'address':
+                if (m.actor.address === self.config.nick) {
+                  self.setNick(m.target[0].address);
+                }
+                self.populateUserList([m.actor.address], [m.target[0].address]);
                 self.displaySystemMessage('status', m.actor.address + ' is now known as ' + m.target[0].address);
                 break;
               default:
@@ -492,6 +518,7 @@
             switch (m.object.objectType) {
               case 'attendance':
                 self.displaySystemMessage('status', 'users: ' + m.object.members.join(', '));
+                self.populateUserList(null, m.object.members);
                 break;
               default:
                 console.log('SC unknown observe received: ', m);
@@ -533,7 +560,6 @@
     /******************
     / REGISTER EVENTS
     *******************/
-
     //
     // listen for input submition text
     function onInput(event) {
@@ -570,7 +596,7 @@
         self.DOMElements.nickChangeInput.disabled = false;
       }
     }
-    if (this.config.allowNickChange) {
+    if (this.config.enableNickChange) {
       self.DOMElements.nickChangeInput.addEventListener('keyup', onNickChange);
       self.DOMElements.nickChangeSubmit.addEventListener('click', onNickChange);
     }
@@ -621,10 +647,11 @@
    * Parameters:
    *
    *   ml - <p> element (message line)
+   *   systemMessage - boolean indicating if this is a system message or not
    *   jumpToBottom - boolean to force the focus back to bottom (default: false)
    *
    */
-  Guppy.prototype.writeToMessageContainer = function (ml, jumpToBottom) {
+  Guppy.prototype.writeToMessageContainer = function (ml, systemMessage, jumpToBottom) {
     //
     // only autoscroll if the user is not scrolling up in the history, because
     // that would be irritating, wouldn't it?
@@ -641,9 +668,11 @@
       this.DOMElements.messagesContainer.scrollTop = this.DOMElements.messagesContainer.scrollHeight;
     }
 
-    // store output to localStorage for page refreshes
-    var key = this.log_id + '-messages-container';
-    window.localStorage.setItem(key, this.DOMElements.messagesContainer.innerHTML);
+    if ((this.config.enableHistory) && (!systemMessage)) {
+      // store output to localStorage for page refreshes
+      var key = this.log_id + '-messages-container';
+      window.localStorage.setItem(key, this.DOMElements.messagesContainer.innerHTML);
+    }
   };
 
   /**
@@ -667,7 +696,7 @@
       messageLine.className = 'guppy-irc-status-line guppy-irc-' + this.config.id + '-status-line';
       messageLine.innerHTML = text;
     }
-    this.writeToMessageContainer(messageLine, jumpToBottom);
+    this.writeToMessageContainer(messageLine, true, jumpToBottom);
   };
 
   /**
@@ -723,7 +752,7 @@
                                ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
     }
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
-    this.writeToMessageContainer(messageLine, jumpToBottom);
+    this.writeToMessageContainer(messageLine, false, jumpToBottom);
   };
 
   /**
@@ -857,6 +886,51 @@
     this.state = state;
   };
 
+  var userList = [];
+  Guppy.prototype.populateUserList = function (rem, add) {
+    var i = 0,
+        j = 0,
+        u = userList;
+
+    rem = (rem) ? rem : [];
+    add = (add) ? add : [];
+
+    console.log('rem: ', rem);
+    console.log('add: ', add);
+    // remove
+    for (i = 0, len = rem.length; i < len; i = i + 1) {
+      u = u.filter(function (e) {
+        return e !== rem[i];
+      });
+    }
+
+    // add
+    for (i = 0, len = add.length; i < len; i = i + 1) {
+      var exists = false;
+      for (j = 0, jlen = u.length; j < jlen; j = j + 1) {
+        if (add[i] === u[j]) {
+          exists = true;
+        }
+      }
+
+      if (!exists) {
+        console.log('adding '+add[i]);
+        u.push(add[i]);
+      }
+    }
+
+    userList = u;
+    console.log('USER LIST: ', u);
+    this.DOMElements.userListContainer.innerHTML = '';
+    for (j = 0, jlen = u.length; j < jlen; j = j + 1) {
+      var userListEntry = document.createElement('p');
+      userListEntry.className = 'guppy-irc-user-list-entry guppy-irc-' + this.config.id + '-user-list-entry';
+      userListEntry.innerHTML = u[j];
+      this.DOMElements.userListContainer.appendChild(userListEntry);
+    }
+
+  };
+
   /**
    * Function: buildWidget
    *
@@ -886,7 +960,7 @@
     var infoContainer = document.createElement('div');
     var nickChangeInput, nickChangeSubmit;  // declare in this scope so we can attach to dom lookup (below)
     infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
-    if (this.config.allowNickChange) {
+    if (this.config.enableNickChange) {
       // nick change input
       nickChangeInput = document.createElement('input');
       nickChangeInput.value = this.config.nick;
@@ -911,6 +985,10 @@
     }
     container.appendChild(infoContainer);
 
+
+    var middleContainer = document.createElement('div');
+    middleContainer.className = 'guppy-irc-middle-container guppy-irc-' + this.config.id + '-middle-container';
+
     // message area
     var messagesContainer = document.createElement('div');
     messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
@@ -920,8 +998,17 @@
     if (this.config.height) {
       messagesContainer.style.height = this.config.height + 'px';
     }
+    middleContainer.appendChild(messagesContainer);
 
-    container.appendChild(messagesContainer);
+    // user list
+    var userListContainer = document.createElement('div');
+    userListContainer.className = 'guppy-irc-user-list-container guppy-irc-' + this.config.id + '-user-list-container';
+    if (this.config.height) {
+      userListContainer.style.height = this.config.height + 'px';
+    }
+    middleContainer.appendChild(userListContainer);
+
+    container.appendChild(middleContainer);
 
     // message input
     var messageInput = document.createElement('input');
@@ -941,6 +1028,7 @@
     messageSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
     messageSubmitContainer.appendChild(messageSubmit);
 
+
     // controls - contain input and submit button
     var controlsContainer = document.createElement('div');
     controlsContainer.className = 'guppy-irc-controls-container guppy-irc-' + this.config.id + '-controls-container';
@@ -948,28 +1036,34 @@
     controlsContainer.appendChild(messageSubmitContainer);
     container.appendChild(controlsContainer);
 
-    // check for existing history
-    var historyContainer = document.createElement('div');
-    historyContainer.className = 'guppy-irc-messages-history-container guppy-irc-' + this.config.id + '-messages-history-container';
-    var key = this.log_id + '-messages-container';
-    var history = window.localStorage.getItem(key);
-    if (history) {
-      historyContainer.innerHTML = history;
-    }
-    historyContainer.firstChild.firstChild.firstChild.firstChild.
-                     firstChild.firstChild.firstChild.innerHTML = '';
-
     this.DOMElements.widget = container;
     this.DOMElements.nickChangeInput = nickChangeInput;
     this.DOMElements.nickChangeSubmit = nickChangeSubmit;
     this.DOMElements.messageInput = messageInput;
     this.DOMElements.messageSubmit = messageSubmit;
     this.DOMElements.messagesContainer = messagesContainer;
-    this.DOMElements.historyContainer = historyContainer;
+    this.DOMElements.userListContainer = userListContainer;
 
-    // we call the method instead of appending directly so the scroll buffer
-    // adjusts
-    this.writeToMessageContainer(historyContainer, true);
+    //
+    // load history buffer if enabled
+    if (this.config.enableHistory) {
+      // check for existing history
+      var historyContainer = document.createElement('div');
+      historyContainer.className = 'guppy-irc-messages-history-container guppy-irc-' + this.config.id + '-messages-history-container';
+      var key = this.log_id + '-messages-container';
+      var history = window.localStorage.getItem(key);
+      if (history) {
+        historyContainer.innerHTML = history;
+      }
+      historyContainer.firstChild.firstChild.firstChild.firstChild.
+                       firstChild.firstChild.firstChild.innerHTML = '';
+
+      this.DOMElements.historyContainer = historyContainer;
+
+      // we call the method instead of appending directly so the scroll buffer
+      // adjusts
+      this.writeToMessageContainer(historyContainer, false, true);
+    }
 
     e.parentNode.replaceChild(container, e);
   };

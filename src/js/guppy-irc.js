@@ -1055,9 +1055,13 @@
       if (history) {
         historyContainer.innerHTML = history;
       }
-      historyContainer.firstChild.firstChild.firstChild.firstChild.
-                       firstChild.firstChild.firstChild.innerHTML = '';
+      try {
+        historyContainer.firstChild.firstChild.firstChild.firstChild.
+                         firstChild.firstChild.firstChild.innerHTML = '';
+      } catch (e) {
+        // ignore...
 
+      }
       this.DOMElements.historyContainer = historyContainer;
 
       // we call the method instead of appending directly so the scroll buffer

@@ -1058,7 +1058,7 @@
       try {
         historyContainer.firstChild.firstChild.firstChild.firstChild.
                          firstChild.firstChild.firstChild.innerHTML = '';
-      } catch (e) {
+      } catch (err) {
         // ignore...
       }
       this.DOMElements.historyContainer = historyContainer;

@@ -417,22 +417,24 @@
         self.sockethubClient = sc;
       }
 
-      // set our credentials for the sockethub platform
-      // (does not activate the IRC session, just stores the data)
-      var credentialObject = {};
-      self.actor = {
-        address: self.config.nick,
-        name: self.config.displayName
-      };
-      credentialObject[self.config.nick] = {
-        nick: self.config.nick,
-        password: self.config.password,
-        server: self.config.server,
-        channels: [ self.config.channel ],
-        actor: self.actor
-      };
 
       function joinRooms() {
+
+        // set our credentials for the sockethub platform
+        // (does not activate the IRC session, just stores the data)
+        var credentialObject = {};
+        self.actor = {
+          address: self.config.nick,
+          name: self.config.displayName
+        };
+        credentialObject[self.config.nick] = {
+          nick: self.config.nick,
+          password: self.config.password,
+          server: self.config.server,
+          channels: [ self.config.channel ],
+          actor: self.actor
+        };
+
         sc.set('irc', {
           credentials: credentialObject
         }).then(function () {

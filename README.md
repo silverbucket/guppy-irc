@@ -13,11 +13,12 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
   <guppy-irc id="myGuppy"
              data-title="Welcome to Guppy IRC"
              data-width="640"
-             data-height="280"
+             data-height="380"
              data-server="<irc_server>"
              data-channel="<#irc_channel>"
              data-nick="guppy"
-             data-allow-nick-change="<true|false>"
+             data-enable-nick-change="<true|false>"
+             data-enable-history="<true|false>"
              data-display-name="Guppy Example User"
              data-password=""
              data-sockethub-host="<sockethub_hostname>"
@@ -41,15 +42,44 @@ dependencies:
 
 * A running [Sockethub](http://github.com/sockethub/sockethub) instance.
 
+## Features
+
+* Fully customizable behavior via data attributes on the HTML widget. All
+  rendered elements contain unique CSS class names for complete skinnability.
+
+* Chat history saved into localStorage so you don't loose your context upon
+  page reload.
+
+* Uses Sockethub's persisting connection feature, meaning a page refresh does
+  not disconnect you and you can continue where you left off. (If you browse
+  away from the page, and you have no sessions using the connect, it will
+  eventually time-out after 60 seconds max).
+
+* Can embed more than one widget on a page without clashes.
+
+* Basic nick-changing ability
+
+* Keeps a running tab of users in a room (see below for current limitations)
+
+#### Missing
+
+* Currently the room you join is hard-coded in the widget data attributes and
+  you cannot change/add rooms within the widget. It's possible to do this with
+  Sockethub, but Guppy IRC is meant to be very simple and the interface does
+  not make sense of multiple rooms. Feel free to extend!
+
+* User lists currently have some limitations due to an incomplete `node-irc`
+  module. So when you refresh you can loose your user list, and can't ask for
+  an update. This should hopefully be fixed soon.
+
 ## Status
 
 Guppy IRC currently has basic functionality. You can connect to a channel, and
-send/receive messages. The UI still needs lots of love.
+send/receive messages. The UI is intentially bare-bones and meant to be stylized
+and customized as an embedded IRC widget.
 
 Also, the Sockethub IRC platform is still under heavy development, as it becomes
-more stable so should Guppy. However right now things appear to be functional
-stable at it's basic element, if lacking in features.
-
+more stable and feature-rich so should Guppy.
 
 ## Example
 
@@ -104,6 +134,10 @@ you to create your own theme css files.
 
   * `.guppy-irc-nick-change-submit`
 
+#### middle area container
+
+  * `.gupper-irc-middle-container`
+
 #### messages
 
   * `.guppy-irc-messages-container` - container of all messages
@@ -130,6 +164,11 @@ The same assignments as above except only added to elements where the text conta
 
   * `.guppy-irc-message-nick-to-me`
 
+#### user list
+
+  * `.guppy-irc-user-list-container`
+
+  * `.guppy-irc-user-list-entry`
 
 #### controls
 The various inputs, buttons, etc.

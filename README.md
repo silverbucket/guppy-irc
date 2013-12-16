@@ -17,6 +17,7 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
              data-server="<irc_server>"
              data-channel="<#irc_channel>"
              data-nick="guppy"
+             data-allow-nick-change="<true|false>"
              data-display-name="Guppy Example User"
              data-password=""
              data-sockethub-host="<sockethub_hostname>"
@@ -85,7 +86,7 @@ you to create your own theme css files.
 #### title
 
   * `.guppy-irc-title-container` - div containing title
-  
+
   * `.guppy-irc-title` - actual title element (an *h1* tag)
 
 
@@ -97,22 +98,22 @@ you to create your own theme css files.
 #### messages
 
   * `.guppy-irc-messages-container` - container of all messages
-  
+
   * `.guppy-irc-message-line` - a single message line
-  
+
   * `.guppy-irc-message-nick` - the nick of a message
-  
+
   * `.guppy-irc-message-nick-decorator` - the decorator (ie. : separator) of the nick -> text
 
 ##### - messages addressed to you
 The same assignments as above except only added to elements where the text contains your IRC nick.
 
   * `.guppy-irc-message-line-to-me`
-  
+
   * `.guppy-irc-message-nick-to-me`
-  
+
   * `.guppy-irc-message-nick-decorator-to-me`
-  
+
   * `.guppy-irc-message-nick-to-me`
 
 
@@ -122,18 +123,18 @@ The various inputs, buttons, etc.
   * `.guppy-irc-controls-container` - contains all controls
 
   * `.guppy-irc-input-container` - the input container
-  
+
   * `.guppy-irc-input` - input form element
-  
+
   * `.guppy-irc-submit-button-container` - send buttong container
-  
+
   * `.guppy-irc-submit-button` - submit button element *(not functional yet)*
 
 #### system messages
 When Guppy needs to speak, it prints out messages in the message container.
 
   * `.guppy-irc-error-line` - line containing error message
-  
+
   * `.guppy-irc-status-line` - line containing status message
 
 ### Multiple widgets per-page

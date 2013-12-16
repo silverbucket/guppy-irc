@@ -20,10 +20,24 @@ guppy-irc {
   font-size: 1.5em;
 }
 
-/* info */
-.guppy-irc-info {
-  display: inline-block;
+/* info container */
+.guppy-irc-info-container {
+  margin: 1% 0 1% 0;
 }
+
+/* nick change */
+.guppy-irc-nick-change-container {
+  display: inline-block;
+  width: 99%;
+  padding: 0 1% 0 0;
+}
+.guppy-irc-nick-change {
+  width: 80%;
+}
+.guppy-irc-nick-change-container::before {
+  content: 'nickname: ';
+}
+
 
 /* messages */
 .guppy-irc-messages-container {
@@ -71,4 +85,5 @@ guppy-irc {
 }
 .guppy-irc-status-line {
   margin: 0;
+  color: blue;
 }

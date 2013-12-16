@@ -297,6 +297,7 @@
     cfg.server = e.getAttribute('data-server') || 'irc.freenode.net';
     cfg.channel = e.getAttribute('data-channel') || '#sockethub';
     cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
+    cfg.allowNickChange = e.getAttribute('data-allow-nick-change');
     cfg.displayName = e.getAttribute('data-display-name') || 'Guppy User';
     cfg.password = e.getAttribute('data-password');
     cfg.autoconnect = e.getAttribute('data-autoconnect');
@@ -305,6 +306,13 @@
     } else {
       cfg.autoconnect = false;
     }
+
+    if (cfg.allowNickChange === 'false') {
+      cfg.allowNickChange = false;
+    } else {
+      cfg.allowNickChange = true;
+    }
+
     if ((typeof cfg.password === 'string') && (cfg.password === '')) {
       cfg.password = undefined;
     }
@@ -352,6 +360,7 @@
    *   UniqueNick string
    */
   function generateUniqueNick(cfg, key) {
+    key = key + '-uid';
     var uid = window.localStorage.getItem(key);
     if (!uid) {
       // generate random number
@@ -391,7 +400,8 @@
     self.DOMElements = {};
     self.DOMElements.original = e;
 
-    self.config.nick = generateUniqueNick(self.config, self.log_id); // make sure each user is unique
+    // make sure each user is unique
+    self.config.nick = self.getNick() || generateUniqueNick(self.config, self.log_id);
 
     console.log('NEW GUPPY ' + self.id + ' nick: ' + self.config.nick + ' :', self.config);
 
@@ -446,10 +456,47 @@
       }
       joinRooms();
 
-      sc.on('message', function (obj) {
-        if ((obj.platform === 'irc') &&
-            (obj.verb === 'send')) {
-          self.displayMessage(obj);
+      sc.on('message', function (m) {
+        if (m.platform !== 'irc') {
+          console.log("SC received object for unkown platform: ", m);
+          return;
+        } else if ((typeof m.status === 'boolean') && (!m.status)) {
+          console.log("SC received error: ", m);
+          self.displaySystemMessage('error', m.message);
+          return;
+        }
+
+        switch (m.verb) {
+          case 'send':
+            //console.log("SC received message: ", m);
+            self.displayMessage(m);
+            break;
+          case 'join':
+            self.displaySystemMessage('status', m.actor.address + ' has joined ' + m.target[0].address);
+            break;
+          case 'update':
+            switch (m.object.objectType) {
+              case 'topic':
+                self.displaySystemMessage('status', m.actor.address + ' has set the topic of ' + m.target[0].address + ' to: ' + m.object.topic);
+                break;
+              case 'address':
+                self.displaySystemMessage('status', m.actor.address + ' is now known as ' + m.target[0].address);
+                break;
+              default:
+                console.log('SC unknown update received: ', m);
+            }
+            break;
+          case 'observe':
+            switch (m.object.objectType) {
+              case 'attendance':
+                self.displaySystemMessage('status', 'users: ' + m.object.members.join(', '));
+                break;
+              default:
+                console.log('SC unknown observe received: ', m);
+            }
+            break;
+          default:
+            console.log("SC received unkown message: ", m);
         }
       });
 
@@ -461,6 +508,7 @@
         self.displaySystemMessage('status', 'reconnected to sockethub.');
         joinRooms();
       });
+
     }
 
     //
@@ -480,7 +528,7 @@
 
     //
     // listen for input submition text
-    function onEnterHandler(event) {
+    function onInput(event) {
       event.which = event.which || event.keyCode;
       if (event.which === 13) {
         //console.log('got enter!!', event);
@@ -492,9 +540,45 @@
         self.DOMElements.input.disabled = false;
       }
     }
-    self.DOMElements.input.addEventListener('keyup', onEnterHandler);
+    self.DOMElements.input.addEventListener('keyup', onInput);
+
+    //
+    // listen for nickchange submition
+    function onNickChange(event) {
+      event.which = event.which || event.keyCode;
+      if (event.which === 13) {
+        //console.log('got enter!!', event);
+        if (nick === self.actor.address) {
+          // nothing to change
+          return;
+        }
+        // send message
+        self.DOMElements.nickChange.disabled = true;
+        var nick = self.DOMElements.nickChange.value;
+        self.changeNick(nick);
+        self.DOMElements.nickChange.disabled = false;
+      }
+    }
+    if (this.config.allowNickChange) {
+      self.DOMElements.nickChange.addEventListener('keyup', onNickChange);
+    }
 
     return this;
+  };
+
+  Guppy.prototype.getNick = function () {
+    var key = self.log_id + '-nick';
+    var nick = window.localStorage.getItem(key);
+    return nick;
+  };
+
+  Guppy.prototype.setNick = function (nick) {
+    var key = self.log_id + '-nick';
+    if (nick) {
+      this.actor.address = nick;
+      this.config.nick = nick;
+      window.localStorage.setItem(key, nick);
+    }
   };
 
   /**
@@ -565,7 +649,7 @@
     // check if my nick is mentioned
     var toMeClassEnding = '-to-me';
     isToMe = false;
-    if (obj.object.text.search(this.config.nick) >= 0) {
+    if ((typeof obj.object.text === 'string') && (obj.object.text.search(this.config.nick) >= 0)) {
       isToMe = true;
     }
 
@@ -600,7 +684,6 @@
                                ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
     }
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
-
     this.writeToMessageContainer(messageLine);
   };
 
@@ -620,7 +703,7 @@
     if (!message) {
       return false;
     }
-
+console.log('self.actor - ', self.actor);
     var obj = {
       verb: 'send',
       platform: 'irc',
@@ -651,6 +734,52 @@
       self.setError(err.message, err);
     });
   };
+
+  /**
+   * Function: changeNick
+   *
+   * Sends a message to Sockethub's IRC platform to change users nick.
+   *
+   * Parameters:
+   *
+   *   nick - text string of nickname to change to.
+   *
+   */
+  Guppy.prototype.changeNick = function (nick) {
+    var self = this;
+    if (!nick) {
+      return false;
+    }
+    self.DOMElements.input.disabled = true;
+
+    var obj = {
+      verb: 'update',
+      platform: 'irc',
+      actor: self.actor,
+      target: [{
+        address: nick
+      }],
+      object: {
+        objectType: 'address'
+      }
+    };
+
+    console.log('changeNick called: ', obj);
+    self.sockethubClient.sendObject(obj).then(function () {
+      // completed
+      //self.displaySystemMessage('status', self.actor.address + ' changed nick to ' + nick);
+      console.log('changeNick return as success: ', obj);
+      console.log('SELF: ', self);
+      self.setNick(nick);
+      self.DOMElements.input.disabled = false;
+    }, function (err) {
+      console.log('changeNick return as error: ', err);
+      // error
+      self.setError(err.message, err);
+      self.DOMElements.input.disabled = false;
+    });
+  };
+
 
   /**
    * Function: setError
@@ -715,8 +844,21 @@
     container.appendChild(titleContainer); // put inside container
 
     // connection information
+
+    // info container
     var infoContainer = document.createElement('div');
+    var nickChange;  // declare in this scope so we can attach to dom lookup (below)
     infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
+    if (this.config.allowNickChange) {
+      // nick change
+      nickChange = document.createElement('input');
+      nickChange.value = this.config.nick;
+      nickChange.className = 'guppy-irc-nick-change guppy-irc-' + this.config.id + '-nick-change';
+      var nickChangeContainer = document.createElement('div');
+      nickChangeContainer.className = 'guppy-irc-nick-change-container guppy-irc-' + this.config.id + '-nick-change-container';
+      nickChangeContainer.appendChild(nickChange);
+      infoContainer.appendChild(nickChangeContainer);
+    }
     container.appendChild(infoContainer);
 
     // message area
@@ -752,6 +894,7 @@
     container.appendChild(controlsContainer);
 
     this.DOMElements.widget = container;
+    this.DOMElements.nickChange = nickChange;
     this.DOMElements.input = input;
     this.DOMElements.submit = submit;
     this.DOMElements.messagesContainer = messagesContainer;

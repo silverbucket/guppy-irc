@@ -114,6 +114,11 @@ you to create your own theme css files.
 
   * `.guppy-irc-message-nick-decorator` - the decorator (ie. : separator) of the nick -> text
 
+##### history
+Previous messages will maintain their classes but be inserted into the history container.
+
+  * `.guppy-irc-messages-history-container`
+
 ##### - messages addressed to you
 The same assignments as above except only added to elements where the text contains your IRC nick.
 

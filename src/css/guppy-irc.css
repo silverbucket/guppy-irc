@@ -44,6 +44,11 @@ guppy-irc {
   float: right;
 }
 
+/* messages history */
+.guppy-irc-messages-history-container {
+  opacity: .9;
+  border-bottom: 1px solid lightgrey;
+}
 
 /* messages */
 .guppy-irc-messages-container {

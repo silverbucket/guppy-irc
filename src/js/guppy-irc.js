@@ -20,6 +20,7 @@
   var app = 'guppy-irc';
   var document = window.document;
   var SockethubClient = window.SockethubClient;
+  var instances = {}; // guppy-irc object instances
 
   if ((typeof SockethubClient === 'undefined') ||
       (typeof SockethubClient.connect === 'undefined')) {
@@ -390,7 +391,6 @@
    *
    *   Guppy instance
    */
-  var instances = []; // guppy-irc object instances
   var Guppy = function (e) {
     var self = this;
     self.setState('initializing');
@@ -526,12 +526,13 @@
     //
     // do all the ugly DOM stuff.
     self.buildWidget();
-    self.displaySystemMessage('status', 'connecting to ' + self.config.server + ' ...');
+
+    self.displaySystemMessage('status', 'connecting to ' + self.config.server + ' ...', true);
 
 
-    //
-    // EVENTS
-    //
+    /******************
+    / REGISTER EVENTS
+    *******************/
 
     //
     // listen for input submition text
@@ -574,17 +575,34 @@
       self.DOMElements.nickChangeSubmit.addEventListener('click', onNickChange);
     }
 
-
-
     return this;
   };
 
+  /**
+   * Function: getNick
+   *
+   * retreives previously used nickname from localStorage
+   *
+   * Returns:
+   *
+   *   string
+   */
   Guppy.prototype.getNick = function () {
     var key = self.log_id + '-nick';
     var nick = window.localStorage.getItem(key);
     return nick;
   };
 
+  /**
+   * Function: setNick
+   *
+   * stores specified nickname to localstorage
+   *
+   * Parameters:
+   *
+   *   nick - nickname
+   *
+   */
   Guppy.prototype.setNick = function (nick) {
     var key = self.log_id + '-nick';
     if (nick) {
@@ -603,9 +621,10 @@
    * Parameters:
    *
    *   ml - <p> element (message line)
+   *   jumpToBottom - boolean to force the focus back to bottom (default: false)
    *
    */
-  Guppy.prototype.writeToMessageContainer = function (ml) {
+  Guppy.prototype.writeToMessageContainer = function (ml, jumpToBottom) {
     //
     // only autoscroll if the user is not scrolling up in the history, because
     // that would be irritating, wouldn't it?
@@ -613,13 +632,18 @@
     // Subtract height of window from scrollHeight, and if the result doesn't
     // match with scrollTop, then we know the user is viewing the buffer.
     var autoScroll = true;
-    if (this.DOMElements.messagesContainer.scrollTop !== (this.DOMElements.messagesContainer.scrollHeight - this.config.height)) {
+    if ((!jumpToBottom) &&
+        (this.DOMElements.messagesContainer.scrollTop !== (this.DOMElements.messagesContainer.scrollHeight - this.config.height))) {
       autoScroll = false;
     }
     this.DOMElements.messagesContainer.appendChild(ml);
     if (autoScroll) {
       this.DOMElements.messagesContainer.scrollTop = this.DOMElements.messagesContainer.scrollHeight;
     }
+
+    // store output to localStorage for page refreshes
+    var key = this.log_id + '-messages-container';
+    window.localStorage.setItem(key, this.DOMElements.messagesContainer.innerHTML);
   };
 
   /**
@@ -631,9 +655,10 @@
    *
    *   type - 'error', 'status'
    *   text - text string to display
+   *   jumpToBottom - boolean to force the focus back to bottom (default: false)
    *
    */
-  Guppy.prototype.displaySystemMessage = function (type, text) {
+  Guppy.prototype.displaySystemMessage = function (type, text, jumpToBottom) {
     var messageLine = document.createElement('p');
     if (type === 'error') {
       messageLine.className = 'guppy-irc-error-line guppy-irc-' + this.config.id + '-error-line';
@@ -642,7 +667,7 @@
       messageLine.className = 'guppy-irc-status-line guppy-irc-' + this.config.id + '-status-line';
       messageLine.innerHTML = text;
     }
-    this.writeToMessageContainer(messageLine);
+    this.writeToMessageContainer(messageLine, jumpToBottom);
   };
 
   /**
@@ -656,9 +681,10 @@
    *   obj - sockethub activity stream object of verb 'send' and platform 'irc'.
    *         ( tip: this function only uses the obj.actor.address,
    *                obj.actor.name, and obj.object.text properties )
+   *   jumpToBottom - boolean to force the focus back to bottom (default: false)
    *
    */
-  Guppy.prototype.displayMessage = function (obj) {
+  Guppy.prototype.displayMessage = function (obj, jumpToBottom) {
     // check if my nick is mentioned
     var toMeClassEnding = '-to-me';
     isToMe = false;
@@ -697,7 +723,7 @@
                                ' guppy-irc-' + this.config.id + '-message-line' + toMeClassEnding;
     }
     messageLine.innerHTML = nick.outerHTML + decorator.outerHTML + text.outerHTML;
-    this.writeToMessageContainer(messageLine);
+    this.writeToMessageContainer(messageLine, jumpToBottom);
   };
 
   /**
@@ -716,7 +742,6 @@
     if (!message) {
       return false;
     }
-console.log('self.actor - ', self.actor);
     var obj = {
       verb: 'send',
       platform: 'irc',
@@ -792,7 +817,6 @@ console.log('self.actor - ', self.actor);
       self.DOMElements.messageInput.disabled = false;
     });
   };
-
 
   /**
    * Function: setError
@@ -896,6 +920,7 @@ console.log('self.actor - ', self.actor);
     if (this.config.height) {
       messagesContainer.style.height = this.config.height + 'px';
     }
+
     container.appendChild(messagesContainer);
 
     // message input
@@ -923,12 +948,28 @@ console.log('self.actor - ', self.actor);
     controlsContainer.appendChild(messageSubmitContainer);
     container.appendChild(controlsContainer);
 
+    // check for existing history
+    var historyContainer = document.createElement('div');
+    historyContainer.className = 'guppy-irc-messages-history-container guppy-irc-' + this.config.id + '-messages-history-container';
+    var key = this.log_id + '-messages-container';
+    var history = window.localStorage.getItem(key);
+    if (history) {
+      historyContainer.innerHTML = history;
+    }
+    historyContainer.firstChild.firstChild.firstChild.firstChild.
+                     firstChild.firstChild.firstChild.innerHTML = '';
+
     this.DOMElements.widget = container;
     this.DOMElements.nickChangeInput = nickChangeInput;
     this.DOMElements.nickChangeSubmit = nickChangeSubmit;
     this.DOMElements.messageInput = messageInput;
     this.DOMElements.messageSubmit = messageSubmit;
     this.DOMElements.messagesContainer = messagesContainer;
+    this.DOMElements.historyContainer = historyContainer;
+
+    // we call the method instead of appending directly so the scroll buffer
+    // adjusts
+    this.writeToMessageContainer(historyContainer, true);
 
     e.parentNode.replaceChild(container, e);
   };
@@ -939,10 +980,12 @@ console.log('self.actor - ', self.actor);
   // are supported on the same page.
   for (var i = 0, len = tags.length; i < len; i = i + 1) {
     try {
-      instances.push(new Guppy(tags[i]));
+      var guppy = new Guppy(tags[i]);
+      instances[guppy.id] = guppy;
     } catch (e) {
       console.log(app + ' ERROR: ' + e, e.stack);
     }
   }
+  window.guppyIRC = instances;
 
 })(window);

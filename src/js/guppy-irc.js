@@ -677,6 +677,7 @@
 
     if ((this.config.enableHistory) && (!systemMessage)) {
       // store output to localStorage for page refreshes
+      console.log(this.log_id + ' storing to history buffer ', ml);
       var key = this.log_id + '-messages-container';
       window.localStorage.setItem(key, this.DOMElements.messagesContainer.innerHTML);
     }
@@ -1010,9 +1011,10 @@
     }
     middleContainer.appendChild(messagesContainer);
 
+    var userListContainer;
     if (this.config.enableUserList) {
       // user list
-      var userListContainer = document.createElement('div');
+      userListContainer = document.createElement('div');
       userListContainer.className = 'guppy-irc-user-list-container guppy-irc-' + this.config.id + '-user-list-container';
       if (this.config.height) {
         userListContainer.style.height = this.config.height + 'px';
@@ -1077,7 +1079,7 @@
 
       // we call the method instead of appending directly so the scroll buffer
       // adjusts
-      this.writeToMessageContainer(historyContainer, false, true);
+      this.writeToMessageContainer(historyContainer, true, true);
     }
 
     e.parentNode.replaceChild(container, e);

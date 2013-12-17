@@ -3,6 +3,8 @@ Guppy IRC
 
 A tiny embeddable IRC client, using the open-source [sockethub service](http://sockethub.org).
 
+[![Guppy IRC](https://raw.github.com/silverbucket/guppy-irc/master/logo/guppy-irc-logo.png)]
+
 ## Use
 
 To use guppy-irc you must include a few `.js` files and define the guppy widget:

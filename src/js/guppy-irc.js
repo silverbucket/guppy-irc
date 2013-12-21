@@ -434,29 +434,30 @@
       function joinRooms() {
         // set our credentials for the sockethub platform
         // (does not activate the IRC session, just stores the data)
-        var credentialObject = {};
         self.actor = {
           address: self.config.nick,
           name: self.config.displayName
         };
-        credentialObject[self.config.nick] = {
-          nick: self.config.nick,
-          password: self.config.password,
-          server: self.config.server,
-          channels: [ self.config.channel ],
-          actor: self.actor
-        };
 
-        sc.set('irc', {
-          credentials: credentialObject
+        sc.sendObject({
+          platform: 'dispatcher',
+          verb: 'set',
+          actor: self.actor,
+          target: [{ platform: 'irc' }],
+          object: {
+            objectType: 'credentials',
+            nick: self.config.nick,
+            password: self.config.password,
+            server: self.config.server,
+          }
         }).then(function () {
           // successful set credentials
           console.log(self.log_id + ' set credentials!');
           return sc.sendObject({
-            verb: 'update',
+            verb: 'join',
             platform: 'irc',
             actor: self.actor,
-            target: []
+            target: [{ address: self.config.channel }]
           });
         }).then(function () {
           console.log(self.log_id + ' connected to ' + self.config.channel);
@@ -524,7 +525,7 @@
           case 'observe':
             switch (m.object.objectType) {
               case 'attendance':
-                self.displaySystemMessage('status', 'users: ' + m.object.members.join(', '));
+                //self.displaySystemMessage('status', 'users: ' + m.object.members.join(', '));
                 self.populateUserList(null, m.object.members);
                 break;
               default:

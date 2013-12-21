@@ -5,10 +5,10 @@ guppy-irc {
   margin: 0;
 }
 
+
 /*
  * LAYOUT
  */
-
 
 /* widget container */
 .guppy-irc-container {
@@ -63,7 +63,6 @@ guppy-irc {
 .guppy-irc-controls-container {
   margin: 1% 0 1% 0;
 }
-
 
 
 /*

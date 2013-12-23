@@ -36,6 +36,24 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
   ...
 ```
 
+You can assign already defined elements to pieces of the UI by assigning the
+elements with special div names.
+
+The naming convention takes the ID you've assigned to your guppy widget **(in
+the above case `myGuppy`)** and adds the component suffix. For example
+
+```html:
+<footer id="myGuppy-controls"></footer>
+```
+
+List of valid suffixes:
+
+* `-controls` - This includes the input to write messages and send button.
+
+* `-user-list` - This is the side-bar list of users.
+
+* `-info` - This contains the input to change nickname and the send button.
+
 ## Dependencies
 
 Guppy IRC uses Sockethub for IRC connectivity, and therefore has the following

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Guppy</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
+
+    <link rel="stylesheet" href="repo/style/headers.css">
+    <link rel="stylesheet" href="repo/style_unstable/drawer.css">
+    <link rel="stylesheet" href="repo/style/input_areas.css">
+    <link rel="stylesheet" href="main.css">
+  </head>
+  <body>
+
+
+    <section id="menu" data-type="sidebar">
+      <header>
+        <menu type="toolbar">
+          <a href="#"><span class="icon icon-add">add</span></a>
+          <a href="#">Done</a>
+        </menu>
+        <h1>IRC Rooms <em>(9)</em></h1>
+      </header>
+
+      <nav>
+        <ul>
+          <li>
+              <a href="#">Join a New Room</a>
+          </li>
+        </ul>
+        <h2>Rooms Joined</h2>
+        <ul>
+          <li><a href="#">#unhosted</a></li>
+          <li><a href="#">#remotestorage</a></li>
+          <li><a href="#">#sockethub</a></li>
+        </ul>
+      </nav>
+    </section>
+
+
+    <section id="drawer" role="region">
+      <header>
+        <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
+        <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
+        <menu type="toolbar">
+          <button>
+            <span class="icon icon-user">User List</span>
+          </button>
+
+          <button>
+            <span class="icon icon-edit">Edit Nickname</span>
+          </button>
+
+          <button>
+            <span class="icon icon-close">Leave Room</span>
+          </button>
+        </menu>
+        <h1><em>#sockethub</em></h1>
+      </header>
+
+      <div role="main">
+        <article id="GuppyApp-messages-container"
+                 class="messages content scrollable header guppy-irc-messages-container">
+        </article>
+
+        <div class="message-input">
+          <form role="search" class="bottom">
+            <button type="submit" id="GuppyApp-message-submit-button">Send</button>
+            <p>
+              <textarea id="GuppyApp-message-input" placeholder="Enter text here" required></textarea>
+            </p>
+          </form>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- config for guppy-irc -->
+    <guppy-irc id="GuppyApp"
+           data-title=""
+           data-server="irc.freenode.net"
+           data-channel="#sockethub"
+           data-nick="guppy"
+           data-render-widget="false"
+           data-enable-history="true"
+           data-display-name="Guppy IRC User"
+           data-password=""
+           data-autoconnect="true"
+           data-sockethub-host="localhost"
+           data-sockethub-port="10550"
+           data-sockethub-tls="false"
+           data-sockethub-path="/sockethub"
+           data-sockethub-secret="1234567890" />
+
+    <script src="../sockethub-client/sockethub-client.js"></script>
+    <script src="../../src/js/guppy-irc.js"></script>  </body>
+  </body>
+</html>

@@ -298,6 +298,7 @@
     cfg.server = e.getAttribute('data-server') || 'irc.freenode.net';
     cfg.channel = e.getAttribute('data-channel') || '#sockethub';
     cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
+    cfg.renderWidget = e.getAttribute('data-render-widget');
     cfg.enableNickChange = e.getAttribute('data-enable-nick-change');
     cfg.enableNickChangeButton = e.getAttribute('data-enable-nick-change-button');
     cfg.enableMessageButton = e.getAttribute('data-enable-message-button');
@@ -311,14 +312,25 @@
     //
     // check for preset IDs for components
     //
-    cfg.infoContainer =  document.getElementById(cfg.id + '-info');
-    cfg.userListContainer =  document.getElementById(cfg.id + '-user-list');
-    cfg.controlsContainer =  document.getElementById(cfg.id + '-controls');
-
+    cfg.definedElements = {};
+    cfg.definedElements.infoContainer =  document.getElementById(cfg.id + '-info');
+    cfg.definedElements.userListContainer =  document.getElementById(cfg.id + '-user-list');
+    cfg.definedElements.controlsContainer =  document.getElementById(cfg.id + '-controls');
+    cfg.definedElements.messageInput =  document.getElementById(cfg.id + '-message-input');
+    cfg.definedElements.messageSubmitButton =  document.getElementById(cfg.id + '-message-submit-button');
+    cfg.definedElements.messagesContainer=  document.getElementById(cfg.id + '-messages-container');
+    cfg.definedElements.nickChangeInput =  document.getElementById(cfg.id + '-nick-change-input');
+    cfg.definedElements.nickChangeSubmitButton =  document.getElementById(cfg.id + '-nick-change-submit-button');
 
     //
     // set boolean flags
     //
+    if (cfg.renderWidget === 'false') {
+      cfg.renderWidget = false;
+    } else {
+      cfg.renderWidget = true;
+    }
+
     if (cfg.autoconnect === 'true') {
       cfg.autoconnect = true;
     } else {
@@ -631,7 +643,9 @@
         self.DOMElements.nickChangeInput.disabled = false;
       }
     }
-    if (this.config.enableNickChange) {
+    if ((this.config.enableNickChange) &&
+        (self.DOMElements.nickChangeInput) &&
+        (self.DOMElements.nickChangeSubmit)) {
       self.DOMElements.nickChangeInput.addEventListener('keyup', onNickChange);
       self.DOMElements.nickChangeSubmit.addEventListener('click', onNickChange);
     }
@@ -820,6 +834,10 @@
     };
 
     console.log('sendMessage called: ', obj);
+    if (!self.sockethubClient) {
+      self.displaySystemMessage('error', 'cannot send message, not connected to sockethub');
+      return;
+    }
     self.sockethubClient.sendObject(obj).then(function () {
       // completed
       // add name to message output
@@ -981,22 +999,24 @@
     var e = this.DOMElements.original;
 
     // encapsulating container
-    var container = document.createElement('div');
-    container.className = 'guppy-irc-container guppy-irc-' + this.config.id + '-container';
+    var container;
+    if (this.config.renderWidget) {
+      container = document.createElement('div');
+      container.className = 'guppy-irc-container guppy-irc-' + this.config.id + '-container';
 
-    // title of widget
-    if (this.config.title) {
-      var title = document.createElement('h1');
-      title.className = 'guppy-irc-title guppy-irc-' + this.config.id + '-title';
-      title.innerHTML = this.config.title;
-      var titleContainer = document.createElement('div');
-      titleContainer.className = 'guppy-irc-title-container guppy-irc-' + this.config.id + '-title-container';
-      titleContainer.appendChild(title);
-      container.appendChild(titleContainer); // put inside container
+      // title of widget
+      if (this.config.title) {
+        var title = document.createElement('h1');
+        title.className = 'guppy-irc-title guppy-irc-' + this.config.id + '-title';
+        title.innerHTML = this.config.title;
+        var titleContainer = document.createElement('div');
+        titleContainer.className = 'guppy-irc-title-container guppy-irc-' + this.config.id + '-title-container';
+        titleContainer.appendChild(title);
+        container.appendChild(titleContainer); // put inside container
+      }
     }
 
 
-    //
     //
     //
     // connection information
@@ -1004,23 +1024,30 @@
     // info container
     //
     //
-    var infoContainer, nickChangeInput, nickChangeSubmit;  // declare in this scope so we can attach to dom lookup (below)
-    if (this.config.infoContainer) {
+    var infoContainer, nickChangeInput, nickChangeSubmit, nickChangeInputContainer;  // declare in this scope so we can attach to dom lookup (below)
+    if (this.config.definedElements.infoContainer) {
       // allow the user to use their own defined locations for components
       infoContainer = this.config.infoContainer;
-    } else {
+    } else if (this.config.renderWidget) {
       infoContainer = document.createElement('div');
+      infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
     }
-    infoContainer.className = 'guppy-irc-info-container guppy-irc-info-' + this.config.id + '-container';
-    if (this.config.enableNickChange) {
+
+    if (this.config.definedElements.nickChangeInput) {
+      nickChangeInput = this.config.definedElments.nickChangeInput;
+    } else if ((this.config.renderWidget) && (this.config.enableNickChange)) {
       // nick change input
       nickChangeInput = document.createElement('input');
       nickChangeInput.value = this.config.nick;
       nickChangeInput.className = 'guppy-irc-nick-change-input guppy-irc-' + this.config.id + '-nick-change-input';
-      var nickChangeInputContainer = document.createElement('div');
+      nickChangeInputContainer = document.createElement('div');
       nickChangeInputContainer.className = 'guppy-irc-nick-change-input-container guppy-irc-' + this.config.id + '-nick-change-input-container';
       nickChangeInputContainer.appendChild(nickChangeInput);
+    }
 
+    if (this.config.definedElements.nickChangeSubmitButton) {
+      nickChangeSubmitButton = this.config.definedElments.nickChangeSubmitButton;
+    } else if ((this.config.renderWidget) && (this.config.enableNickChange)) {
       // nick change submit button
       nickChangeSubmit = document.createElement('input');
       nickChangeSubmit.className = 'guppy-irc-nick-change-submit-button guppy-irc-' + this.config.id + '-nick-change-submit-button';
@@ -1042,7 +1069,7 @@
       infoContainer.appendChild(nickChangeInputContainer);
       infoContainer.appendChild(nickChangeSubmitContainer);
     }
-    if (!this.config.infoContainer) {
+    if ((this.config.renderWidget) && (!this.config.definedElements.infoContainer)) {
       container.appendChild(infoContainer);
     }
 
@@ -1052,23 +1079,31 @@
     // middle container
     //
     //
-    var middleContainer = document.createElement('div');
-    middleContainer.className = 'guppy-irc-middle-container guppy-irc-' + this.config.id + '-middle-container';
+    var middleContainer;
+    if (this.config.renderWidget) {
+      middleContainer  = document.createElement('div');
+      middleContainer.className = 'guppy-irc-middle-container guppy-irc-' + this.config.id + '-middle-container';
+    }
 
     //
     //
     // message area container
     //
     //
-    var messagesContainer = document.createElement('div');
-    messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
-    if (this.config.width) {
-      messagesContainer.style.width = this.config.width + 'px';
+    var messagesContainer;
+    if (this.config.definedElements.messagesContainer) {
+      messagesContainer = this.config.definedElements.messagesContainer;
+    } else if (this.config.renderWidget) {
+      messagesContainer = document.createElement('div');
+      messagesContainer.className = 'guppy-irc-messages-container guppy-irc-' + this.config.id + '-messages-container';
+      if (this.config.width) {
+        messagesContainer.style.width = this.config.width + 'px';
+      }
+      if (this.config.height) {
+        messagesContainer.style.height = this.config.height + 'px';
+      }
+      middleContainer.appendChild(messagesContainer);
     }
-    if (this.config.height) {
-      messagesContainer.style.height = this.config.height + 'px';
-    }
-    middleContainer.appendChild(messagesContainer);
 
     //
     //
@@ -1076,79 +1111,83 @@
     //
     //
     var userListContainer;
-    if (this.config.enableUserList) {
+    if (this.config.definedElements.userListContainer) {
+      // allow the user to use their own defined locations for components
+      userListContainer = this.config.userListContainer;
+    } else if ((this.config.renderWidget) && (this.config.enableUserList)) {
       //
       // user list
       //
-      console.log('D --1', this.config.userListContainer);
-      if (this.config.userListContainer) {
-      console.log('D --2');
-        // allow the user to use their own defined locations for components
-        userListContainer = this.config.userListContainer;
-      } else {
-      console.log('D --3');
-        userListContainer = document.createElement('div');
-      }
-      console.log('D --4');
+      userListContainer = document.createElement('div');
       userListContainer.className = 'guppy-irc-user-list-container guppy-irc-' + this.config.id + '-user-list-container';
 
-      console.log('D --5');
-      if (!this.config.userListContainer) {
+      if (!this.config.definedElements.userListContainer) {
         if (this.config.height) {
           userListContainer.style.height = this.config.height + 'px';
         }
-      console.log('D --6');
         middleContainer.appendChild(userListContainer);
       }
     }
 
-    container.appendChild(middleContainer);
-
+    if (this.config.renderWidget) {
+      container.appendChild(middleContainer);
+    }
 
     //
     //
     // message controls
     //
-    //
     // message input
-    var messageInput = document.createElement('textarea');
-    messageInput.className = 'guppy-irc-message-input guppy-irc-' + this.config.id + '-input';
-    var messageInputContainer = document.createElement('div');
-    messageInputContainer.className = 'guppy-irc-message-input-container guppy-irc-' + this.config.id + '-message-input-container';
-    messageInputContainer.appendChild(messageInput);
+    var messageInput, messageInputContainer;
+    if (this.config.definedElements.messageInput) {
+      messageInput = this.config.definedElements.messageInput;
+    } else {
+      messageInput = document.createElement('textarea');
+      messageInput.className = 'guppy-irc-message-input guppy-irc-' + this.config.id + '-input';
+      messageInputContainer = document.createElement('div');
+      messageInputContainer.className = 'guppy-irc-message-input-container guppy-irc-' + this.config.id + '-message-input-container';
+      messageInputContainer.appendChild(messageInput);
+    }
 
     // message submit button
-    var messageSubmit = document.createElement('input');
-    messageSubmit.className = 'guppy-irc-message-submit-button guppy-irc-' + this.config.id + '-message-submit-button';
-    messageSubmit.type = 'submit';
-    messageSubmit.name = 'Send';
-    messageSubmit.value = 'Send';
-    messageSubmit.id = 'guppy-irc-' + this.config.id + '-message-submit-button';
-    var messageSubmitContainer = document.createElement('div');
-    messageSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
+    var messageSubmit, messageSubmitContainer;
+    if (this.config.definedElements.messageSubmitButton) {
+      messageSubmit = this.config.definedElements.messageSubmitButton;
+    } else {
+      messageSubmit = document.createElement('input');
+      messageSubmit.className = 'guppy-irc-message-submit-button guppy-irc-' + this.config.id + '-message-submit-button';
+      messageSubmit.type = 'submit';
+      messageSubmit.name = 'Send';
+      messageSubmit.value = 'Send';
+      messageSubmit.id = 'guppy-irc-' + this.config.id + '-message-submit-button';
+      mssageSubmitContainer = document.createElement('div');
+      messageSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
 
-    if (! this.config.enableMessageButton) {
-      messageInputContainer.style.width = "100%";
-      messageInput.style.width = "100%";
-      messageSubmitContainer.style.display = 'none';
+      if (! this.config.enableMessageButton) {
+        messageInputContainer.style.width = "100%";
+        messageInput.style.width = "100%";
+        messageSubmitContainer.style.display = 'none';
+      }
+      messageSubmitContainer.appendChild(messageSubmit);
     }
-    messageSubmitContainer.appendChild(messageSubmit);
 
     //
     // controls - contain input and submit button
     //
-    var controlsContainer;
-    if (this.config.controlsContainer) {
-      // allow the user to use their own defined locations for components
-      controlsContainer = this.config.controlsContainer;
-    } else {
-      controlsContainer = document.createElement('div');
-    }
-    controlsContainer.className = 'guppy-irc-controls-container guppy-irc-' + this.config.id + '-controls-container';
-    controlsContainer.appendChild(messageInputContainer);
-    controlsContainer.appendChild(messageSubmitContainer);
-    if (!this.config.controlsContainer) {
-      container.appendChild(controlsContainer);
+    if (!this.config.definedElements.messageInput) {
+      var controlsContainer;
+      if (this.config.definedElements.controlsContainer) {
+        // allow the user to use their own defined locations for components
+        controlsContainer = this.config.controlsContainer;
+      } else {
+        controlsContainer = document.createElement('div');
+      }
+      controlsContainer.className = 'guppy-irc-controls-container guppy-irc-' + this.config.id + '-controls-container';
+      controlsContainer.appendChild(messageInputContainer);
+      controlsContainer.appendChild(messageSubmitContainer);
+      if (!this.config.definedElements.controlsContainer) {
+        container.appendChild(controlsContainer);
+      }
     }
 
     this.DOMElements.widget = container;
@@ -1183,7 +1222,9 @@
       this.writeToMessageContainer(historyContainer, true, true);
     }
 
-    e.parentNode.replaceChild(container, e);
+    if (this.config.renderWidget) {
+      e.parentNode.replaceChild(container, e);
+    }
   };
 
   var tags = document.getElementsByTagName('guppy-irc');

@@ -289,24 +289,26 @@
    *
    *   config object
    */
-  function getGuppyConfig(e) {
-    var cfg = {};
-    cfg.id = e.id;
-    cfg.title = e.getAttribute('data-title');
-    cfg.width = e.getAttribute('data-width');
-    cfg.height = e.getAttribute('data-height');
-    cfg.server = e.getAttribute('data-server') || 'irc.freenode.net';
-    cfg.channel = e.getAttribute('data-channel') || '#sockethub';
-    cfg.nick = e.getAttribute('data-nick') || 'guppy_user';
-    cfg.renderWidget = e.getAttribute('data-render-widget');
-    cfg.enableNickChange = e.getAttribute('data-enable-nick-change');
-    cfg.enableNickChangeButton = e.getAttribute('data-enable-nick-change-button');
-    cfg.enableMessageButton = e.getAttribute('data-enable-message-button');
-    cfg.enableHistory = e.getAttribute('data-enable-history');
-    cfg.enableUserList= e.getAttribute('data-enable-user-list');
-    cfg.displayName = e.getAttribute('data-display-name') || 'Guppy User';
-    cfg.password = e.getAttribute('data-password');
-    cfg.autoconnect = e.getAttribute('data-autoconnect');
+  function getGuppyConfig(e, cfg) {
+    if (typeof cfg !== 'object') {
+      cfg = {};
+    }
+    cfg.id = cfg.id || e.id || 'UndefinedID';
+    cfg.title = cfg.title || e.getAttribute('data-title');
+    cfg.width = cfg.width || e.getAttribute('data-width');
+    cfg.height = cfg.height || e.getAttribute('data-height');
+    cfg.server = cfg.server || e.getAttribute('data-server') || 'irc.freenode.net';
+    cfg.channel = cfg.channel || e.getAttribute('data-channel') || '#sockethub';
+    cfg.nick = cfg.nick || e.getAttribute('data-nick') || 'guppy_user';
+    cfg.renderWidget = cfg.renderWidget || e.getAttribute('data-render-widget');
+    cfg.enableNickChange = cfg.enableNickChange || e.getAttribute('data-enable-nick-change');
+    cfg.enableNickChangeButton = cfg.enableNickChangeButton || e.getAttribute('data-enable-nick-change-button');
+    cfg.enableMessageButton = cfg.enableMessageButton || e.getAttribute('data-enable-message-button');
+    cfg.enableHistory = cfg.enableHistory || e.getAttribute('data-enable-history');
+    cfg.enableUserList= cfg.enableUserList || e.getAttribute('data-enable-user-list');
+    cfg.displayName = cfg.displayName || e.getAttribute('data-display-name') || 'Guppy User';
+    cfg.password = cfg.password || e.getAttribute('data-password');
+    cfg.autoconnect = cfg.autoconnect || e.getAttribute('data-autoconnect');
 
 
     //
@@ -314,7 +316,7 @@
     //
     cfg.definedElements = {};
     cfg.definedElements.infoContainer =  document.getElementById(cfg.id + '-info');
-    cfg.definedElements.userListContainer =  document.getElementById(cfg.id + '-user-list');
+    cfg.definedElements.userListContainer =  document.getElementById(cfg.id + '-user-list-container');
     cfg.definedElements.controlsContainer =  document.getElementById(cfg.id + '-controls');
     cfg.definedElements.messageInput =  document.getElementById(cfg.id + '-message-input');
     cfg.definedElements.messageSubmitButton =  document.getElementById(cfg.id + '-message-submit-button');
@@ -372,12 +374,15 @@
     }
 
     // sockethub config
-    cfg.sockethub = {};
-    cfg.sockethub.host = e.getAttribute('data-sockethub-host');
-    cfg.sockethub.port = e.getAttribute('data-sockethub-port');
-    cfg.sockethub.tls = e.getAttribute('data-sockethub-tls');
-    cfg.sockethub.path = e.getAttribute('data-sockethub-path');
-    cfg.sockethub.secret = e.getAttribute('data-sockethub-secret');
+    if (typeof cfg.sockethub !== 'object') {
+      cfg.sockethub = {};
+    }
+    cfg.sockethub.host = cfg.sockethub.host || getAttribute('data-sockethub-host');
+    cfg.sockethub.port = cfg.sockethub.port || e.getAttribute('data-sockethub-port');
+    cfg.sockethub.tls = cfg.sockethub.tls || e.getAttribute('data-sockethub-tls');
+    cfg.sockethub.path = cfg.sockethub.path || e.getAttribute('data-sockethub-path');
+    cfg.sockethub.secret = cfg.sockethub.secret || e.getAttribute('data-sockethub-secret');
+
     if (cfg.sockethub.tls === 'true') {
       cfg.sockethub.tls = true;
       cfg.sockethub.connectString = 'wss://';
@@ -444,10 +449,10 @@
    *
    *   Guppy instance
    */
-  var Guppy = function (e) {
+  var Guppy = function (e, cfg) {
     var self = this;
     self.setState('initializing');
-    self.config = getGuppyConfig(e);
+    self.config = getGuppyConfig(e, cfg);
     self.id = self.config.id;
     self.log_id = app + '#' + self.id;
     self.DOMElements = {};
@@ -833,6 +838,8 @@
       }
     };
 
+    message = message.replace(/^\s+|\s+$/g, "");
+
     console.log('sendMessage called: ', obj);
     if (!self.sockethubClient) {
       self.displaySystemMessage('error', 'cannot send message, not connected to sockethub');
@@ -978,6 +985,7 @@
 
     userList = u;
     console.log('USER LIST: ', u);
+    console.log('USER LIST CONTAINER: ', this.DOMElements.userListContainer.innerHTML);
     this.DOMElements.userListContainer.innerHTML = '';
     for (j = 0, jlen = u.length; j < jlen; j = j + 1) {
       var userListEntry = document.createElement('p');
@@ -1227,18 +1235,37 @@
     }
   };
 
+  window.guppyIRC = {
+    instances: instances
+  };
+
+  function create (elem, cfg) {
+    try {
+      var guppy = new Guppy(elem, cfg);
+      window.guppyIRC.instances[guppy.id] = guppy;
+    } catch (e) {
+      console.log(app + ' ERROR: ' + e, e.stack);
+    }
+  }
+
+  window.guppyIRC.create = function (cfg) {
+    var stub = {
+      getAttribute: function () {
+        return '';
+      }
+    };
+    create(stub, cfg);
+  };
+
   var tags = document.getElementsByTagName('guppy-irc');
   console.log('Guppy tags: ' + typeof tags, tags);
   // foreach tag we create a separate object instance, this way multiple embeds
   // are supported on the same page.
   for (var i = 0, len = tags.length; i < len; i = i + 1) {
-    try {
-      var guppy = new Guppy(tags[i]);
-      instances[guppy.id] = guppy;
-    } catch (e) {
-      console.log(app + ' ERROR: ' + e, e.stack);
-    }
+    window.guppyIRC.create(tags[i]);
   }
-  window.guppyIRC = instances;
+
+
+
 
 })(window);

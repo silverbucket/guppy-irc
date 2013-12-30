@@ -10,15 +10,20 @@
     <link rel="stylesheet" href="repo/style_unstable/drawer.css">
     <link rel="stylesheet" href="repo/style/input_areas.css">
     <link rel="stylesheet" href="main.css">
+
+    <link rel="stylesheet" href="icons/styles/action_icons.css">
+    <link rel="stylesheet" href="icons/styles/settings_icons.css">
   </head>
   <body>
 
 
+    <!--
+      slider menu
+      -->
     <section id="menu" data-type="sidebar">
       <header>
         <menu type="toolbar">
-          <a href="#"><span class="icon icon-add">add</span></a>
-          <a href="#">Done</a>
+          <a href="#add"><span class="icon icon-add">add</span></a>
         </menu>
         <h1>IRC Rooms <em>(9)</em></h1>
       </header>
@@ -39,16 +44,19 @@
     </section>
 
 
+    <!--
+      chat panel
+      -->
     <section id="drawer" role="region">
       <header>
         <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
         <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
         <menu type="toolbar">
-          <button>
+          <button id="user-list-btn">
             <span class="icon icon-user">User List</span>
           </button>
 
-          <button>
+          <button id="nickname-change-btn">
             <span class="icon icon-edit">Edit Nickname</span>
           </button>
 
@@ -56,7 +64,7 @@
             <span class="icon icon-close">Leave Room</span>
           </button>
         </menu>
-        <h1><em>#sockethub</em></h1>
+        <h1>#sockethub</h1>
       </header>
 
       <div role="main">
@@ -73,28 +81,52 @@
           </form>
         </div>
       </div>
-
     </section>
 
 
-    <!-- config for guppy-irc -->
-    <guppy-irc id="GuppyApp"
-           data-title=""
-           data-server="irc.freenode.net"
-           data-channel="#sockethub"
-           data-nick="guppy"
-           data-render-widget="false"
-           data-enable-history="true"
-           data-display-name="Guppy IRC User"
-           data-password=""
-           data-autoconnect="true"
-           data-sockethub-host="localhost"
-           data-sockethub-port="10550"
-           data-sockethub-tls="false"
-           data-sockethub-path="/sockethub"
-           data-sockethub-secret="1234567890" />
+    <!--
+      user list
+      -->
+    <section role="region" id="user-list-view" class="move-down skin-organic">
+      <header>
+        <button id="user-list-close-btn"><span class="icon icon-close">close</span></button>
+        <menu type="toolbar"><button id="user-list-done-btn"><span>done</span></button></menu>
+        <h1>User List</h1>
+      </header>
+
+      <div role="main">
+        <article id="GuppyApp-user-list-container" class="guppy-irc-user-list-container content scrollable header">
+        </article>
+      </div>
+    </section>
+
+
+    <!--
+      edit nickname
+      -->
+    <section role="region" id="nickname-change-view" class="move-down skin-organic">
+      <header>
+        <a id="nickname-change-close-btn" href="#"><span class="icon icon-close">close</span></a>
+        <menu type="toolbar"><button id="nickname-change-done-btn"><span>done</span></button></menu>
+        <h1>Change Nickname</h1>
+      </header>
+
+      <form>
+        <fieldset>
+          <legend>Nickname</legend>
+          <section>
+            <p>
+              <input type="text" required=""></input>
+              <button type="reset">Clear</button>
+            </p>
+          </section>
+        </fieldset>
+      </form>
+    </section>
+
 
     <script src="../sockethub-client/sockethub-client.js"></script>
     <script src="../../src/js/guppy-irc.js"></script>  </body>
+    <script src="app.js"></script>  </body>
   </body>
 </html>

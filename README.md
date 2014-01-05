@@ -221,6 +221,17 @@ So, while `.guppy-irc-message-container` applies to any Guppy widget,
 instance with that `id` tag value of `myGuppy`.
 
 
+credits
+-------
+
+Developed by [Nick Jennings](http://github.com/silverbucket)
+
+Sponsored by [NLNET](http://nlnet.nl)
+
+[![NLNET Logo](http://sockethub.org/img/nlnet-logo.svg)](http://nlnet.nl)
+
+
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/silverbucket/guppy-irc/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

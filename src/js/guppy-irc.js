@@ -24,7 +24,7 @@
 
   if ((typeof SockethubClient === 'undefined') ||
       (typeof SockethubClient.connect === 'undefined')) {
-    console.log(app + ' ERROR: SockethubClient object not found, be sure to include sockethub-client.js before guppy-irc.js.');
+    console.error(app + ' ERROR: SockethubClient object not found, be sure to include sockethub-client.js before guppy-irc.js.');
     return false;
   }
 
@@ -121,7 +121,6 @@
       x[1] = add32(b, x[1]);
       x[2] = add32(c, x[2]);
       x[3] = add32(d, x[3]);
-
     }
 
     function cmn(q, a, b, x, s, t) {
@@ -327,62 +326,25 @@
     //
     // set boolean flags
     //
-    if (cfg.renderWidget === 'false') {
-      cfg.renderWidget = false;
-    } else {
-      cfg.renderWidget = true;
-    }
-
-    if (cfg.autoconnect === 'true') {
-      cfg.autoconnect = true;
-    } else {
-      cfg.autoconnect = false;
-    }
-
-    if (cfg.enableNickChange === 'false') {
-      cfg.enableNickChange = false;
-    } else {
-      cfg.enableNickChange = true;
-    }
-
-    if (cfg.enableNickChangeButton === 'false') {
-      cfg.enableNickChangeButton = false;
-    } else {
-      cfg.enableNickChangeButton = true;
-    }
-
-    if (cfg.enableMessageButton === 'false') {
-      cfg.enableMessageButton = false;
-    } else {
-      cfg.enableMessageButton = true;
-    }
-
-    if (cfg.enableHistory === 'false') {
-      cfg.enableHistory = false;
-    } else {
-      cfg.enableHistory = true;
-    }
-
-    if (cfg.enableUserList === 'false') {
-      cfg.enableUserList = false;
-    } else {
-      cfg.enableUserList = true;
-    }
+    cfg.renderWidget  = (cfg.renderWidget === 'false') ? false : true;
+    cfg.autoconnect = (cfg.autoconnect === 'true') ? true : false;
+    cfg.enableNickChange = (cfg.enableNickChange === 'false') ? false : true;
+    cfg.enableNickChangeButton = (cfg.enableNickChangeButton === 'false') ? false : true;
+    cfg.enableMessageButton = (cfg.enableMessageButton === 'false') ? false : true;
+    cfg.enableHistory = (cfg.enableHistory === 'false') ? false : true;
+    cfg.enableUserList = (cfg.enableUserList === 'false') ? false : true;
 
     if ((typeof cfg.password === 'string') && (cfg.password === '')) {
       cfg.password = undefined;
     }
 
     // sockethub config
-    if (typeof cfg.sockethub !== 'object') {
-      cfg.sockethub = {};
-    }
-    cfg.sockethub.host = cfg.sockethub.host || getAttribute('data-sockethub-host');
+    cfg.sockethub = (typeof cfg.sockethub === 'object') ? cfg.sockethub : {};
+    cfg.sockethub.host = cfg.sockethub.host || e.getAttribute('data-sockethub-host');
     cfg.sockethub.port = cfg.sockethub.port || e.getAttribute('data-sockethub-port');
     cfg.sockethub.tls = cfg.sockethub.tls || e.getAttribute('data-sockethub-tls');
     cfg.sockethub.path = cfg.sockethub.path || e.getAttribute('data-sockethub-path');
     cfg.sockethub.secret = cfg.sockethub.secret || e.getAttribute('data-sockethub-secret');
-
     if (cfg.sockethub.tls === 'true') {
       cfg.sockethub.tls = true;
       cfg.sockethub.connectString = 'wss://';
@@ -747,6 +709,7 @@
     if (type === 'error') {
       messageLine.className = 'guppy-irc-error-line guppy-irc-' + this.config.id + '-error-line';
       messageLine.innerHTML = 'ERROR: ' + text;
+      console.error('ERROR: ' + text);
     } else {
       messageLine.className = 'guppy-irc-status-line guppy-irc-' + this.config.id + '-status-line';
       messageLine.innerHTML = text;
@@ -963,8 +926,8 @@
     console.log('add: ', add);
     // remove
     for (i = 0, len = rem.length; i < len; i = i + 1) {
-      u = u.filter(function (e) {
-        return e !== rem[i];
+      u = u.filter(function (item) {
+        return item !== rem[i];
       });
     }
 
@@ -1031,8 +994,8 @@
     //
     // info container
     //
-    //
-    var infoContainer, nickChangeInput, nickChangeSubmit, nickChangeInputContainer;  // declare in this scope so we can attach to dom lookup (below)
+    // - declare in this scope so we can attach to dom lookup (below)
+    var infoContainer, nickChangeInput, nickChangeSubmit, nickChangeInputContainer;
     if (this.config.definedElements.infoContainer) {
       // allow the user to use their own defined locations for components
       infoContainer = this.config.infoContainer;
@@ -1086,7 +1049,6 @@
     //
     // middle container
     //
-    //
     var middleContainer;
     if (this.config.renderWidget) {
       middleContainer  = document.createElement('div');
@@ -1096,7 +1058,6 @@
     //
     //
     // message area container
-    //
     //
     var messagesContainer;
     if (this.config.definedElements.messagesContainer) {
@@ -1117,7 +1078,6 @@
     //
     // user list container
     //
-    //
     var userListContainer;
     if (this.config.definedElements.userListContainer) {
       // allow the user to use their own defined locations for components
@@ -1137,6 +1097,7 @@
       }
     }
 
+    //
     if (this.config.renderWidget) {
       container.appendChild(middleContainer);
     }
@@ -1168,7 +1129,7 @@
       messageSubmit.name = 'Send';
       messageSubmit.value = 'Send';
       messageSubmit.id = 'guppy-irc-' + this.config.id + '-message-submit-button';
-      mssageSubmitContainer = document.createElement('div');
+      messageSubmitContainer = document.createElement('div');
       messageSubmitContainer.className = 'guppy-irc-message-submit-button-container guppy-irc-' + this.config.id + '-message-submit-button-container';
 
       if (! this.config.enableMessageButton) {
@@ -1258,11 +1219,11 @@
   };
 
   var tags = document.getElementsByTagName('guppy-irc');
-  console.log('Guppy tags: ' + typeof tags, tags);
   // foreach tag we create a separate object instance, this way multiple embeds
   // are supported on the same page.
   for (var i = 0, len = tags.length; i < len; i = i + 1) {
-    window.guppyIRC.create(tags[i]);
+    console.log('Guppy tag: '+i, tags[i]);
+    create(tags[i], {});
   }
 
 

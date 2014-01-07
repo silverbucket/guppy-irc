@@ -8,60 +8,130 @@
 
     <link rel="stylesheet" href="repo/style/headers.css">
     <link rel="stylesheet" href="repo/style_unstable/drawer.css">
+    <link rel="stylesheet" href="repo/style_unstable/lists.css">
     <link rel="stylesheet" href="repo/style/input_areas.css">
-    <link rel="stylesheet" href="main.css">
 
     <link rel="stylesheet" href="icons/styles/action_icons.css">
     <link rel="stylesheet" href="icons/styles/settings_icons.css">
+
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="mobile-nav.css">
   </head>
   <body>
 
-
     <!--
-      slider menu
+      settings
       -->
-    <section id="menu" data-type="sidebar">
+    <section id="room-list-view" data-type="sidebar">
       <header>
         <menu type="toolbar">
-          <a href="#add"><span class="icon icon-add">add</span></a>
         </menu>
-        <h1>IRC Rooms <em>(9)</em></h1>
+        <h1>Settings</h1>
       </header>
 
       <nav>
         <ul>
           <li>
-              <a href="#">Join a New Room</a>
+              <a href="#">IRC Server</a>
+              <a href="#">Sockethub</a>
           </li>
-        </ul>
-        <h2>Rooms Joined</h2>
-        <ul>
-          <li><a href="#">#unhosted</a></li>
-          <li><a href="#">#remotestorage</a></li>
-          <li><a href="#">#sockethub</a></li>
         </ul>
       </nav>
     </section>
 
 
     <!--
-      chat panel
+      rooms list
       -->
     <section id="drawer" role="region">
       <header>
         <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
         <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
         <menu type="toolbar">
-          <button id="user-list-btn">
-            <span class="icon icon-user">User List</span>
+          <button id="nickname-change-show">
+            <span class="icon icon-edit" id="nickname-change-show">Edit Nickname</span>
+          </button>
+          <a href="#join-room" id="join-room-show"><span class="icon icon-add" id="join-room-show">Join a Room</span></a>
+        </menu>
+        <h1>Joined Rooms <em>9</em></h1>
+      </header>
+
+      <div role="main">
+        <article id=""
+                 class="content scrollable header">
+          <div data-type="list">
+          <ul id="room-list">
+            <li><a href="#" id="room-show"><p id="room-show">#sockethub</p></a></li>
+            <li><a href="#" id="room-show"><p id="room-show">#remotestorage</p></a></li>
+            <li><a href="#" id="room-show"><p id="room-show">#unhosted</p></a></li>
+          </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+
+    <!--
+      join room
+      -->
+    <section role="region" id="join-room-view" class="move-down skin-organic">
+      <header>
+        <a id="join-room-hide" href="#"><span id="join-room-hide" class="icon icon-close">close</span></a>
+        <menu type="toolbar"><button id="join-room-confirm"><span>done</span></button></menu>
+        <h1>Join Room</h1>
+      </header>
+
+      <form id="join-room-form">
+        <fieldset>
+          <legend>Room</legend>
+          <section>
+            <p>
+              <input type="text" required=""></input>
+              <button type="reset">Clear</button>
+            </p>
+          </section>
+        </fieldset>
+      </form>
+    </section>
+
+    <!--
+      change nickname
+      -->
+    <section role="region" id="nickname-change-view" class="move-down skin-organic">
+      <header>
+        <a id="nickname-change-hide" href="#"><span id="nickname-change-hide" class="icon icon-close">close</span></a>
+        <menu type="toolbar"><button id="nickname-change-confirm"><span id="nickname-change-confirm">done</span></button></menu>
+        <h1>Change Nickname</h1>
+      </header>
+
+      <form id="nickname-change-form">
+        <fieldset>
+          <legend>Nickname</legend>
+          <section>
+            <p>
+              <input type="text" required=""></input>
+              <button type="reset">Clear</button>
+            </p>
+          </section>
+        </fieldset>
+      </form>
+    </section>
+
+    <!--
+      chat console
+      -->
+    <secton role="region" id="room-view" class="slide-right">
+      <header>
+        <a id="room-hide" href="#">
+          <span id="room-hide" class="icon icon-back"></span>
+        </a>
+        <menu type="toolbar">
+          <button id="user-list-show">
+            <span id="user-list-show" class="icon icon-user">User List</span>
           </button>
 
-          <button id="nickname-change-btn">
-            <span class="icon icon-edit">Edit Nickname</span>
-          </button>
-
-          <button>
-            <span class="icon icon-close">Leave Room</span>
+          <button id="room-leave">
+            <span class="icon icon-close" id="room-leave">Leave Room</span>
           </button>
         </menu>
         <h1>#sockethub</h1>
@@ -89,8 +159,8 @@
       -->
     <section role="region" id="user-list-view" class="move-down skin-organic">
       <header>
-        <button id="user-list-close-btn"><span class="icon icon-close">close</span></button>
-        <menu type="toolbar"><button id="user-list-done-btn"><span>done</span></button></menu>
+        <button id="user-list-hide"><span class="icon icon-close">close</span></button>
+        <menu type="toolbar"><button id="user-list-hide"><span id="user-list-hide">done</span></button></menu>
         <h1>User List</h1>
       </header>
 
@@ -101,28 +171,6 @@
     </section>
 
 
-    <!--
-      edit nickname
-      -->
-    <section role="region" id="nickname-change-view" class="move-down skin-organic">
-      <header>
-        <a id="nickname-change-close-btn" href="#"><span class="icon icon-close">close</span></a>
-        <menu type="toolbar"><button id="nickname-change-done-btn"><span>done</span></button></menu>
-        <h1>Change Nickname</h1>
-      </header>
-
-      <form>
-        <fieldset>
-          <legend>Nickname</legend>
-          <section>
-            <p>
-              <input type="text" required=""></input>
-              <button type="reset">Clear</button>
-            </p>
-          </section>
-        </fieldset>
-      </form>
-    </section>
 
 
     <script src="../sockethub-client/sockethub-client.js"></script>

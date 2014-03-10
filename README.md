@@ -24,10 +24,11 @@ To use guppy-irc you must include a few `.js` files and define the guppy widget:
              data-enable-user-list="<true|false>"
              data-display-name="Guppy Example User"
              data-password=""
+             data-autoconnect="<true|false>"
              data-sockethub-host="<sockethub_hostname>"
              data-sockethub-port="<port_number>"
              data-sockethub-tls="<true|false>"
-             data-sockethub-path="*<uri_path>"
+             data-sockethub-path="/<uri_path>"
              data-sockethub-secret="<register_string>" />
 
   ...

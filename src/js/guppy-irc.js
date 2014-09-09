@@ -446,10 +446,9 @@
         };
 
         sc.sendObject({
-          platform: 'dispatcher',
+          platform: 'irc',
           verb: 'set',
           actor: self.actor,
-          target: [{ platform: 'irc' }],
           object: {
             objectType: 'credentials',
             nick: self.config.nick,
@@ -505,7 +504,9 @@
             self.displayMessage(m);
             break;
           case 'join':
-            self.displaySystemMessage('status', m.actor.address + ' has joined ' + m.target[0].address);
+            if (m.actor.address) {
+              self.displaySystemMessage('status', m.actor.address + ' has joined ' + m.target[0].address);
+            }
             self.populateUserList(null, [m.actor.address]);
             break;
           case 'leave':
